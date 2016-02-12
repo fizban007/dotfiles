@@ -103,9 +103,6 @@ Each entry is either:
   (setq paradox-github-token "cd93000d19abd085bf9a4bb4910e8a41024ac236")
   )
 
-(defun alex/pre-init-yasnippet ()
-  (push "~/.emacs.d/private/alex/snippets" auto-completion-private-snippets-directory))
-
 (defun alex/post-init-yasnippet ()
   (yas-advise-indent-function 'cdlatex-tab)
   (yas-advise-indent-function 'org-cycle)
