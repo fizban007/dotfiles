@@ -41,7 +41,8 @@
     magit
     org
     yasnippet
-    (cdlatex :location local))
+    (cdlatex :location local)
+    (swig-mode :location local))
   "The list of Lisp packages required by the alex layer.
 
 Each entry is either:
@@ -78,6 +79,9 @@ Each entry is either:
   (use-package cuda-mode
     :mode ("\\.cu\\'" "\\.cuh\\'"))
   )
+
+(defun alex/init-swig-mode ()
+  (use-package swig-mode))
 
 (defun alex/post-init-auctex ()
   (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex))
