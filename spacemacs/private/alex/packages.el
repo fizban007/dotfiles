@@ -33,22 +33,14 @@
   '(
     auctex
     cc-mode
-    cmake-ide
     company
-    company-irony
-    company-irony-c-headers
     cuda-mode
     evil
     evil-surround
-    flycheck
-    flycheck-irony
-    google-c-style
     helm
-    irony
     magit
     org
     paradox
-    rtags
     yasnippet
     (cdlatex :location local))
   "The list of Lisp packages required by the alex layer.
@@ -78,101 +70,10 @@ Each entry is either:
       - A list beginning with the symbol `recipe' is a melpa
         recipe.  See: https://github.com/milkypostman/melpa#recipe-format")
 
-(defun alex/init-irony ()
-  (use-package irony
-    :defer t
-    :commands (irony-mode)
-    :init
-    (progn
-      (add-hook 'c++-mode-hook 'irony-mode)
-      (add-hook 'c-mode-hook 'irony-mode)
-      (add-hook 'objc-mode-hook 'irony-mode))
-    :config
-    (progn
-      ;; replace the `completion-at-point' and `complete-symbol' bindings in
-      ;; irony-mode's buffers by irony-mode's function
-      (defun my-irony-mode-hook ()
-        (define-key irony-mode-map [remap completion-at-point]
-          'irony-completion-at-point-async)
-        (define-key irony-mode-map [remap complete-symbol]
-          'irony-completion-at-point-async)
-        (setq company-backends (remove 'company-clang company-backends))
-        (add-to-list 'company-backends 'company-irony)
-        (add-to-list 'company-backends 'company-irony-c-headers))
-      (add-hook 'irony-mode-hook 'my-irony-mode-hook)
-      (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
-      )))
-
-(defun alex/init-flycheck-irony ()
-  (use-package flycheck-irony
-    :init
-    (eval-after-load 'flycheck
-      '(add-hook 'flycheck-mode-hook #'flycheck-irony-setup))))
-
-(defun alex/init-rtags ()
-  (use-package rtags
-    :init
-    (defun use-rtags (&optional useFileManager)
-      (and (rtags-executable-find "rc")
-           (cond ((not (gtags-get-rootpath)) t)
-                 ((and (not (eq major-mode 'c++-mode))
-                       (not (eq major-mode 'c-mode))) (rtags-has-filemanager))
-                 (useFileManager (rtags-has-filemanager))
-                 (t (rtags-is-indexed)))))
-
-    (defun tags-find-symbol-at-point (&optional prefix)
-      (interactive "P")
-      (if (and (not (rtags-find-symbol-at-point prefix)) rtags-last-request-not-indexed)
-          (gtags-find-tag)))
-    (defun tags-find-references-at-point (&optional prefix)
-      (interactive "P")
-      (if (and (not (rtags-find-references-at-point prefix)) rtags-last-request-not-indexed)
-          (gtags-find-rtag)))
-    (defun tags-find-symbol ()
-      (interactive)
-      (call-interactively (if (use-rtags) 'rtags-find-symbol 'gtags-find-symbol)))
-    (defun tags-find-references ()
-      (interactive)
-      (call-interactively (if (use-rtags) 'rtags-find-references 'gtags-find-rtag)))
-    (defun tags-find-file ()
-      (interactive)
-      (call-interactively (if (use-rtags t) 'rtags-find-file 'gtags-find-file)))
-    (defun tags-imenu ()
-      (interactive)
-      (call-interactively (if (use-rtags t) 'rtags-imenu 'idomenu)))
-
-    (rtags-enable-standard-keybindings c-mode-base-map "\C-cr")
-    (add-to-list 'evil-emacs-state-modes 'rtags-mode)
-    ))
-
-(defun alex/init-company-irony ()
-  (use-package company-irony))
-
-(defun alex/init-company-irony-c-headers ()
-  (use-package company-irony-c-headers))
-
-(defun alex/init-cmake-ide ()
-  (use-package cmake-ide
-    :defer t
-    :commands (cmake-ide-setup)
-    :init
-    (progn
-      (add-hook 'c-mode-common-hook (lambda ()
-                                      (cmake-ide-setup)
-                                      ;; (cmake-ide-maybe-run-cmake)
-                                      ))
-      )))
-
 (defun alex/init-cdlatex ()
   (use-package cdlatex)
   (evil-outline-folding-latex)
   )
-
-(defun alex/init-google-c-style ()
-  (use-package google-c-style
-    :commands (google-set-c-style)
-    :init
-    (add-hook 'c-mode-common-hook (lambda () (google-set-c-style)))))
 
 (defun alex/init-cuda-mode ()
   (use-package cuda-mode
@@ -196,17 +97,6 @@ Each entry is either:
     (global-set-key (kbd "C-x b") 'helm-mini)
     (global-set-key (kbd "C-x C-f") 'helm-find-files)
     (global-set-key (kbd "M-y") 'helm-show-kill-ring))
-  )
-
-(defun alex/post-init-cc-mode ()
-  (add-hook 'c-mode-common-hook (lambda ()
-                                  (define-key c-mode-base-map (kbd "<f5>") 'cmake-ide-compile)
-                                  (define-key c-mode-base-map (kbd "<f6>") '(lambda ()(interactive)
-                                                                              (my-cppcm-test "ninja" cmake-ide-dir)))
-                                  (define-key c-mode-base-map (kbd "TAB") 'tab-indent-or-complete)
-                                  ))
-  ;; ;; Treat all .h files as c++ files
-  ;; (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
   )
 
 (defun alex/post-init-paradox ()
@@ -244,15 +134,9 @@ Each entry is either:
   (add-hook 'c++-mode-hook (lambda ()
                              (push '(?< . ("<" . ">")) evil-surround-pairs-alist))))
 
-(defun alex/post-init-flycheck ()
-  (spacemacs|use-package-add-hook flycheck
-    :post-config
-    (add-hook 'c-mode-common-hook (lambda () (progn
-                                               (add-to-list 'flycheck-disabled-checkers 'c/c++-clang)
-                                               (add-to-list 'flycheck-disabled-checkers 'c/c++-cppcheck)
-                                               (add-to-list 'flycheck-disabled-checkers 'c/c++-gcc)
-                                               ;; (setq flycheck-cppcheck-language-standard "c++11")
-                                               )))))
+(defun alex/post-init-cc-mode ()
+  (add-hook 'c-mode-common-hook (lambda ()
+                                  (define-key c-mode-base-map (kbd "TAB") 'tab-indent-or-complete))))
 
 ;; TODO: Finish configuration of latex and org modes
 

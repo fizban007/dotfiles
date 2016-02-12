@@ -38,8 +38,10 @@ values."
      (c-c++ :variables
             c-c++-default-mode-for-headers 'c++-mode
             c-c++-enable-clang-support t)
+     c++-ide
      latex
-     colors
+     python
+     (colors :variables colors-enable-rainbow-identifiers nil)
      eyebrowse
      haskell
      alex

@@ -1,9 +1,3 @@
-(defun my-cppcm-test (make-command test-dir)
-  "Run the test suite in test-dir"
-  (let ((default-directory test-dir)
-        (compile-command (concat make-command " check -C " test-dir))) 
-    (call-interactively 'compile)))
-
 (defun check-expansion ()
   (save-excursion
     (if (looking-at "\\_>") t

@@ -1,0 +1,57 @@
+#+TITLE: c++-ide layer
+#+HTML_HEAD_EXTRA: <link rel="stylesheet" type="text/css" href="../css/readtheorg.css" />
+
+#+CAPTION: logo
+
+# The maximum height of the logo should be 200 pixels.
+[[img/c++-ide.png]]
+
+* Table of Contents                                        :TOC_4_org:noexport:
+ - [[Description][Description]]
+ - [[Features][Features]]
+ - [[Install][Install]]
+   - [[Layer][Layer]]
+   - [[Google C style][Google C style]]
+   - [[Build command][Build command]]
+ - [[Key bindings][Key bindings]]
+
+* Description
+This layer adds IDE capabilities for C/C++ to spacemacs.
+
+* Features
+- Use =irony= for code completion.
+- Use =flycheck-irony= for instant code checking.
+- Use =rtags= to navigate through the codebase, jumping to references, etc.
+- Use =cmake-ide= to pull in project configuration through =cmake=, and configure auto completion.
+- Apply =google-c-style= as coding standard.
+
+* Install
+
+** Layer
+To use this contribution add it to your =~/.spacemacs=
+
+#+begin_src emacs-lisp
+  (setq-default dotspacemacs-configuration-layers '(c++-ide))
+#+end_src
+
+** Google C style
+To use the google C style, set the variable =c++-ide-use-google-c-style= to =t= in the dotfile:
+
+#+BEGIN_SRC emacs-lisp
+  (setq-default dotspacemacs-configuration-layers
+                '((c++-ide :variable c++-ide-use-google-c-style t)))
+#+END_SRC
+
+** Build command
+The default build system used is =ninja=, but this can be changed by the
+variable =c++-ide-build-command=. The unit tests are bound to ~<F6>~, and it
+runs either =ninja check= or =make check= depending on the value of the variable.
+
+* Key bindings
+
+| Key Binding | Description                                                   |
+|-------------+---------------------------------------------------------------|
+| ~C-c r~     | leader key binding for rtags commands                         |
+| ~<F5>~      | compile the cmake project                                     |
+| ~<F6>~      | run all unit tests using either "ninja check" or "make check" |
+|             |                                                               |
