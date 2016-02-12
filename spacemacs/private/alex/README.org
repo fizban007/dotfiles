@@ -1,0 +1,66 @@
+#+TITLE: Alex's Personal Configuration Layer
+#+HTML_HEAD_EXTRA: <link rel="stylesheet" type="text/css" href="../css/readtheorg.css" />
+
+#+CAPTION: logo
+
+# The maximum height of the logo should be 200 pixels.
+[[img/alex.png]]
+
+* Table of Contents                                        :TOC_4_org:noexport:
+ - [[Description][Description]]
+ - [[Install][Install]]
+ - [[Key bindings][Key bindings]]
+   - [[General][General]]
+   - [[Evil rebinding][Evil rebinding]]
+   - [[Company mode][Company mode]]
+   - [[C/C++ mode][C/C++ mode]]
+
+* Description
+This layer includes my own personal configuration.
+
+* Install
+To use this contribution add it to your =~/.spacemacs=
+
+#+begin_src emacs-lisp
+  (setq-default dotspacemacs-configuration-layers '(alex))
+#+end_src
+
+* Key bindings
+
+** General
+I prefer helm-mini to ido-switch-buffer
+
+| Key Binding | Description                                                           |
+|-------------+-----------------------------------------------------------------------|
+| ~C-x b~     | launches helm-mini for buffer jumps                                   |
+| ~tab~       | complete at point, expand yasnippet, or indent if nothing can be done |
+
+** Evil rebinding
+Rebinding some of the keys to better suit Colemak keymap
+
+| Key Binding | Description                                                |
+|-------------+------------------------------------------------------------|
+| ~k~         | both in normal and visual state, evil-next-visual-line     |
+| ~h~         | both in normal and visual state, evil-previous-visual-line |
+| ~j~         | both in normal and visual state, evil-backward-char        |
+| ~C-e~       | go to end of line regardless of mode                       |
+| ~C-n~       | go to the next line regardless of mode                     |
+| ~C-p~       | go to the previous line regardless of mode                 |
+| ~C-f~       | move forward by a character regardless of mode             |
+| ~C-b~       | move backward by a character regardless of mode            |
+
+** Company mode
+Tweaking the default company bindings to make more sense
+
+| Key Binding | Description                                 |
+|-------------+---------------------------------------------|
+| ~C-n~       | select next entry in company completion     |
+| ~C-p~       | select previous entry in company completion |
+
+** C/C++ mode
+
+| Key Binding | Description                                                           |
+|-------------+-----------------------------------------------------------------------|
+| ~F5~        | compile with cmake-ide                                                |
+| ~F6~        | run test cases                                                        |
+|             |                                                                       |
