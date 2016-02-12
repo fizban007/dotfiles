@@ -40,7 +40,6 @@
     helm
     magit
     org
-    paradox
     yasnippet
     (cdlatex :location local))
   "The list of Lisp packages required by the alex layer.
@@ -99,10 +98,6 @@ Each entry is either:
     (global-set-key (kbd "M-y") 'helm-show-kill-ring))
   )
 
-(defun alex/post-init-paradox ()
-  (setq paradox-github-token "cd93000d19abd085bf9a4bb4910e8a41024ac236")
-  )
-
 (defun alex/post-init-yasnippet ()
   (yas-advise-indent-function 'cdlatex-tab)
   (yas-advise-indent-function 'org-cycle)
@@ -110,7 +105,7 @@ Each entry is either:
   )
 
 (defun alex/post-init-magit ()
-  (add-hook 'magit-status-mode-hook 'evil-emacs-state)
+  (add-to-list 'evil-emacs-state-modes 'magit-status-mode)
   (global-set-key (kbd "C-c g") 'magit-status))
 
 (defun alex/post-init-company ()
