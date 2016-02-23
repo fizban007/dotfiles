@@ -288,8 +288,6 @@ layers configuration. You are free to put any user code."
                               "-I/usr/lib/gcc/x86_64-unknown-linux-gnu/5.3.0/include-fixed"
                               "-I/usr/include"
                               ))
-
-  (setq paradox-github-token "cd93000d19abd085bf9a4bb4910e8a41024ac236")
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
