@@ -251,6 +251,7 @@ It is called immediately after `dotspacemacs/init'.  You are free to put almost
 any user code here.  The exception is org related code, which should be placed
 in `dotspacemacs/user-config'."
   (setq x-select-enable-clipboard-manager nil)
+  (setq evil-want-Y-yank-to-eol t)
   )
 
 (defun dotspacemacs/user-config ()
@@ -297,6 +298,7 @@ layers configuration. You are free to put any user code."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(evil-want-Y-yank-to-eol nil)
  '(irony-lighter " I")
  '(irony-server-install-prefix "~/.emacs.d/private/alex/irony/")
  '(irony-user-dir "~/.emacs.d/private/alex/irony/")
@@ -304,7 +306,8 @@ layers configuration. You are free to put any user code."
  '(paradox-automatically-star t)
  '(safe-local-variable-values
    (quote
-    ((cmake-ide-dir . "/home/alex/Programs/Aperture2/ninja")))))
+    ((cmake-ide-dir . "/home/alex/Programs/Aperture/ninja")
+     (cmake-ide-dir . "/home/alex/Programs/Aperture2/ninja")))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
