@@ -97,7 +97,7 @@ Each entry is either:
             '(("t" "Todo" entry (file+headline "~/.org/newgtd.org" "Tasks")
                "* TODO %^{Brief Description}  %^g\n%?\nAdded: %U")
               ("n" "Notes" entry (file+datetree "~/.org/notes/notes.org")
-               "* %^{Topic} \n%i%?\n") 
+               "* %^{Topic} \n%i%?\n")
               ("b" "Birthday" plain (file+headline "~/.org/birthday.org" "Birthdays")
                "\%\%%?\(org-anniversary  %^{Date}\) %^{Name} would be \%d years old.\n")
               ("w" "Post" entry (file+datetree "~/org-jekyll/org/cyr.org")
@@ -108,6 +108,12 @@ Each entry is either:
 
       ;; Use cdlatex in org mode
       (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+
+      ;; Turn off linum in org mode
+      (add-hook 'org-mode-hook (lambda ()
+                                 ;; turn off line number for org-mode
+                                 (linum-mode -1)))
+
 
       ;; Add markdown export
       (add-to-list 'org-export-backends 'md)

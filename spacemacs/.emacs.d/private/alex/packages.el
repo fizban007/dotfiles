@@ -31,6 +31,7 @@
 
 (defconst alex-packages
   '(
+    ag
     auctex
     cc-mode
     company
@@ -39,7 +40,6 @@
     evil-surround
     helm
     magit
-    org
     yasnippet
     (cdlatex :location local)
     (swig-mode :location local))
@@ -70,6 +70,9 @@ Each entry is either:
       - A list beginning with the symbol `recipe' is a melpa
         recipe.  See: https://github.com/milkypostman/melpa#recipe-format")
 
+(defun alex/init-ag ()
+  (use-package ag))
+
 (defun alex/init-cdlatex ()
   (use-package cdlatex)
   (evil-outline-folding-latex)
@@ -81,7 +84,8 @@ Each entry is either:
   )
 
 (defun alex/init-swig-mode ()
-  (use-package swig-mode))
+  (use-package swig-mode
+    :mode "\\.i\\'"))
 
 (defun alex/post-init-auctex ()
   (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex))
@@ -118,11 +122,6 @@ Each entry is either:
                                   (define-key company-active-map (kbd "C-n") 'company-select-next)
                                   (define-key company-active-map (kbd "C-p") 'company-select-previous)
                                   )))
-
-(defun alex/post-init-org ()
-  (add-hook 'org-mode-hook (lambda ()
-                             ;; turn off line number for org-mode
-                             (linum-mode -1))))
 
 (defun alex/post-init-evil-surround ()
   (add-hook 'emacs-lisp-mode-hook (lambda ()
