@@ -42,6 +42,7 @@ values."
      (c++-ide :variables
               c++-ide-use-google-c-style t)
      latex
+     latex-custom
      python
      (colors :variables colors-enable-rainbow-identifiers nil)
      eyebrowse
@@ -253,6 +254,43 @@ any user code here.  The exception is org related code, which should be placed
 in `dotspacemacs/user-config'."
   (setq x-select-enable-clipboard-manager nil)
   (setq evil-want-Y-yank-to-eol t)
+
+  (defun hs-hide-leafs-recursive (minp maxp)
+    "Hide blocks below point that do not contain further blocks in
+    region (MINP MAXP)."
+    (when (hs-find-block-beginning)
+      (setq minp (1+ (point)))
+      (funcall hs-forward-sexp-func 1)
+      (setq maxp (1- (point))))
+    (unless hs-allow-nesting
+      (hs-discard-overlays minp maxp))
+    (goto-char minp)
+    (let ((leaf t))
+      (while (progn
+               (forward-comment (buffer-size))
+               (and (< (point) maxp)
+                    (re-search-forward hs-block-start-regexp maxp t)))
+        (setq pos (match-beginning hs-block-start-mdata-select))
+        (if (hs-hide-leafs-recursive minp maxp)
+            (save-excursion
+              (goto-char pos)
+              (hs-hide-block-at-point t)))
+        (setq leaf nil))
+      (goto-char maxp)
+      leaf))
+
+  (defun hs-hide-leafs ()
+    "Hide all blocks in the buffer that do not contain subordinate
+    blocks.  The hook `hs-hide-hook' is run; see `run-hooks'."
+    (interactive)
+    (hs-life-goes-on
+     (save-excursion
+       (message "Hiding blocks ...")
+       (save-excursion
+         (goto-char (point-min))
+         (hs-hide-leafs-recursive (point-min) (point-max)))
+       (message "Hiding blocks ... done"))
+     (run-hooks 'hs-hide-hook)))
   )
 
 (defun dotspacemacs/user-config ()
@@ -288,6 +326,7 @@ layers configuration. You are free to put any user code."
                               "-I/usr/lib/gcc/x86_64-unknown-linux-gnu/5.3.0/include-fixed"
                               "-I/usr/include"
                               ))
+
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -297,15 +336,32 @@ layers configuration. You are free to put any user code."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(LaTeX-math-list
+   (quote
+    ((54 "partial" "" nil)
+     (113 "theta" "" nil)
+     (81 "Theta" "" nil)
+     (47 "frac" "" nil)
+     (95 "bar" "" nil)
+     (99 "chi" "" nil)
+     (50 "sqrt" "" nil)
+     (56 "infty" "" nil))))
+ '(evil-disable-insert-state-bindings t)
  '(evil-want-Y-yank-to-eol nil)
+ '(irony-additional-clang-options (quote ("-std=c++14")))
  '(irony-lighter " I")
  '(irony-server-install-prefix "~/.emacs.d/private/alex/irony/")
  '(irony-user-dir "~/.emacs.d/private/alex/irony/")
+ '(magit-pull-arguments nil)
  '(mouse-wheel-scroll-amount (quote (1 ((shift) . 1) ((control)))))
+ '(org-agenda-files (quote ("~/.org/tricks.org")))
  '(paradox-automatically-star t)
+ '(paradox-github-token t)
  '(safe-local-variable-values
    (quote
-    ((cmake-ide-dir . "/home/alex/Programs/Aperture/ninja")
+    ((cmake-ide-build-dir . "/home/alex/Programs/Aperture/ninja")
+     (cmake-ide-build-dir . "/home/alex/Programs/Aperture2/ninja")
+     (cmake-ide-dir . "/home/alex/Programs/Aperture/ninja")
      (cmake-ide-dir . "/home/alex/Programs/Aperture2/ninja")))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

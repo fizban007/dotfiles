@@ -32,7 +32,6 @@
 (defconst alex-packages
   '(
     ag
-    auctex
     cc-mode
     company
     cuda-mode
@@ -41,7 +40,6 @@
     helm
     magit
     yasnippet
-    (cdlatex :location local)
     (swig-mode :location local))
   "The list of Lisp packages required by the alex layer.
 
@@ -73,11 +71,6 @@ Each entry is either:
 (defun alex/init-ag ()
   (use-package ag))
 
-(defun alex/init-cdlatex ()
-  (use-package cdlatex)
-  (evil-outline-folding-latex)
-  )
-
 (defun alex/init-cuda-mode ()
   (use-package cuda-mode
     :mode ("\\.cu\\'" "\\.cuh\\'"))
@@ -86,9 +79,6 @@ Each entry is either:
 (defun alex/init-swig-mode ()
   (use-package swig-mode
     :mode "\\.i\\'"))
-
-(defun alex/post-init-auctex ()
-  (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex))
 
 (defun alex/post-init-helm ()
   (spacemacs|use-package-add-hook helm
@@ -113,7 +103,9 @@ Each entry is either:
   )
 
 (defun alex/post-init-magit ()
-  (add-to-list 'evil-emacs-state-modes 'magit-status-mode)
+  (add-hook 'magit-status-refresh-hook '(lambda () (evil-emacs-state)))
+  ;; (add-to-list 'evil-emacs-state-modes 'magit-status-mode)
+  ;; (add-to-list 'evil-emacs-state-modes 'magit-mode)
   (global-set-key (kbd "C-c g") 'magit-status))
 
 (defun alex/post-init-company ()

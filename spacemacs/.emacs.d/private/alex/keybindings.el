@@ -29,6 +29,9 @@
 ;; Add a convenient fold toggle binding
 (define-key evil-normal-state-map (kbd "z <SPC>") 'evil-toggle-fold)
 (define-key evil-visual-state-map (kbd "z <SPC>") 'evil-toggle-fold)
+;; Redefine close all folds to close all levels
+(define-key evil-normal-state-map (kbd "z m") 'hs-hide-level)
+(define-key evil-visual-state-map (kbd "z m") 'hs-hide-level)
 
 ;; Use tab to indent or complete depending on situation
 (global-set-key (kbd "TAB") 'tab-indent-or-complete)
