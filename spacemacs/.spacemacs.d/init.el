@@ -359,7 +359,10 @@ layers configuration. You are free to put any user code."
  '(paradox-github-token t)
  '(safe-local-variable-values
    (quote
-    ((cmake-ide-build-dir . "/home/alex/Programs/Aperture/ninja")
+    ((zotero-collection .
+                        #("10" 0 2
+                          (name "PICpaper")))
+     (cmake-ide-build-dir . "/home/alex/Programs/Aperture/ninja")
      (cmake-ide-build-dir . "/home/alex/Programs/Aperture2/ninja")
      (cmake-ide-dir . "/home/alex/Programs/Aperture/ninja")
      (cmake-ide-dir . "/home/alex/Programs/Aperture2/ninja")))))
