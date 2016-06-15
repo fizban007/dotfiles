@@ -1,0 +1,9 @@
+[submodule "spacemacs/.emacs.d/private/arxiv/local/arxiv-mode"]
+	path = spacemacs/.emacs.d/private/arxiv/local/arxiv-mode
+	url = git@github.com:fizban007/arxiv-mode.git
+[submodule "awesome/.config/awesome/lain"]
+	path = awesome/.config/awesome/lain
+	url = git@github.com:copycat-killer/lain.git
+[submodule "awesome/.config/awesome/tyrannical"]
+	path = awesome/.config/awesome/tyrannical
+	url = git@github.com:Elv13/tyrannical.git
