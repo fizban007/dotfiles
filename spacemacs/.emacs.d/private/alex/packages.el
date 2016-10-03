@@ -73,7 +73,9 @@ Each entry is either:
 
 (defun alex/init-cuda-mode ()
   (use-package cuda-mode
-    :mode ("\\.cu\\'" "\\.cuh\\'"))
+    :mode ("\\.cu\\'" "\\.cuh\\'")
+    :config
+    (add-hook 'cuda-mode-hook 'hs-minor-mode))
   )
 
 (defun alex/init-swig-mode ()
