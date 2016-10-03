@@ -167,6 +167,7 @@ Each entry is either:
                                   (define-key c-mode-base-map (kbd "<f6>") '(lambda ()(interactive)
                                                                               (c++-ide-cmake-check c++-ide-build-command cmake-ide-dir)))
                                   ))
+  (add-hook 'c-mode-common-hook #'smartparens-mode)
   )
 
 (defun c++-ide/post-init-flycheck ()
