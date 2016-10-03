@@ -205,7 +205,7 @@ tyrannical.tags = {
         volatile    = true,
         position    = 8,
         layout      = awful.layout.suit.floating,
-        exec_once   = "visit",
+        --exec_once   = "visit",
         class       = {
             "VisIt", "GUI", "Viewer"
         },
