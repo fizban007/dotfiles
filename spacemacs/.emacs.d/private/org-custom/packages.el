@@ -145,7 +145,7 @@ Each entry is either:
           (add-to-list 'org-latex-classes
                        '("cyr-org-article"
                          "\\documentclass[11pt,letterpaper]{article}
-                    \\usepackage{graphicx} 
+                    \\usepackage{graphicx}
                     \\usepackage{amsmath}
                     \\usepackage{tikz}
                     \\usepackage{hyperref}
@@ -164,7 +164,7 @@ Each entry is either:
                          ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
           ;; ;; Use xelatex to process the file
-          ;; (setq org-latex-pdf-process 
+          ;; (setq org-latex-pdf-process
           ;;       '("pdflatex -interaction nonstopmode %f"
           ;;         "pdflatex -interaction nonstopmode %f")) ;; for multiple passes
 
@@ -193,6 +193,34 @@ Each entry is either:
                  :publishing-function org-latex-publish-to-pdf)
                 ("notes" :components ("notes-html" "notes-pdf"))
                 )))
+
+      (setq org-mobile-directory "~/Dropbox/Org")
+      (setq org-mobile-inbox-for-pull "~/.org/from-mobile.org")
+      (add-to-list 'org-mobile-files "~/.org/follow-up.org")
+      (add-to-list 'org-mobile-files "~/.org/someday.org")
+      (add-to-list 'org-mobile-files "~/.org/todo.org")
+
+      (defvar org-mobile-push-timer nil
+        "Timer that `org-mobile-push-timer' used to reschedule itself, or nil.")
+
+      (defun org-mobile-push-with-delay (secs)
+        (when org-mobile-push-timer
+          (cancel-timer org-mobile-push-timer))
+        (setq org-mobile-push-timer
+              (run-with-idle-timer
+               (* 1 secs) nil 'org-mobile-push)))
+
+      (add-hook 'after-save-hook
+                (lambda ()
+                  (when (eq major-mode 'org-mode)
+                    (dolist (file (org-mobile-files-alist))
+                      (if (string= (file-truename (expand-file-name (car file)))
+                                   (file-truename (buffer-file-name)))
+                          (org-mobile-push-with-delay 30)))
+                    )))
+
+      (run-at-time "00:05" 86400 '(lambda () (org-mobile-push-with-delay 1))) ;; refreshes agenda file each day
+
       )))
 
 ;;; packages.el ends here
