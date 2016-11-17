@@ -33,6 +33,7 @@
   '(
     auctex
     pdf-tools
+    zotelo
     (cdlatex :location local)
     )
   "The list of Lisp packages required by the latex-custom layer.
@@ -89,12 +90,17 @@ Each entry is either:
             (output-html "xdg-open")))))
 
   (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)
-  (add-hook 'LaTeX-mode-hook (lambda () (add-to-list 'TeX-command-list '("MkLaTeX" "latexmk -pdf -pdflatex='pdflatex -file-line-error -synctex=1' -pvc %t" TeX-run-command nil (latex-mode docTeX-mode)))))
-  (add-hook 'LaTeX-mode-hook (lambda () (setq TeX-command-default "MkLaTeX")))
+  ;; (add-hook 'LaTeX-mode-hook (lambda () (add-to-list 'TeX-command-list '("MkLaTeX" "latexmk -pdf -pdflatex='pdflatex -file-line-error -synctex=1' -pvc %t" TeX-run-command nil (latex-mode docTeX-mode)))))
+  ;; (add-hook 'LaTeX-mode-hook (lambda () (setq TeX-command-default "MkLaTeX")))
   (add-hook 'LaTeX-mode-hook 'setup-synctex-latex)
   )
 
 (defun latex-custom/init-pdf-tools ()
   (pdf-tools-install))
+
+(defun latex-custom/init-zotelo ()
+  (use-package zotelo)
+  (add-hook 'LaTeX-mode-hook 'zotelo-minor-mode)
+)
 
 ;;; packages.el ends here
