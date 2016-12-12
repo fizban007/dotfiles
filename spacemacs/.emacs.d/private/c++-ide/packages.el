@@ -33,14 +33,12 @@
   '(
     cc-mode
     cmake-ide
-    company
     company-irony
     company-irony-c-headers
     flycheck
     flycheck-irony
     google-c-style
     gtags
-    irony
     rtags
     )
   "The list of Lisp packages required by the c++-ide layer.
