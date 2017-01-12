@@ -35,7 +35,6 @@
     cc-mode
     company
     cuda-mode
-    ;; evil
     evil-surround
     helm
     magit
