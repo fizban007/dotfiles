@@ -39,6 +39,10 @@
     helm
     magit
     yasnippet
+    nlinum
+    eclim
+    company-emacs-eclim
+    gradle-mode
     (swig-mode :location local))
   "The list of Lisp packages required by the alex layer.
 
@@ -70,6 +74,25 @@ Each entry is either:
 (defun alex/init-ag ()
   (use-package ag))
 
+(defun alex/init-eclim ()
+  (use-package eclim)
+  (setq eclimd-autostart t)
+  (global-eclim-mode)
+  )
+
+(defun alex/init-gradle-mode ()
+  (use-package gradle-mode)
+  (gradle-mode 1))
+
+(defun alex/init-company-emacs-eclim ()
+  (require 'company-emacs-eclim)
+  (add-hook 'java-mode-hook 'company-emacs-eclim-setup)
+  ;; (company-emacs-eclim-setup)
+)
+
+(defun alex/init-nlinum ()
+  (use-package nlinum))
+
 (defun alex/init-cuda-mode ()
   (use-package cuda-mode
     :mode ("\\.cu\\'" "\\.cuh\\'")
@@ -83,8 +106,7 @@ Each entry is either:
 
 (defun alex/post-init-helm ()
   (spacemacs|use-package-add-hook helm
-    :post-config
-
+    :post-init
     (when (executable-find "curl")
       (setq helm-google-suggest-use-curl-p t))
 

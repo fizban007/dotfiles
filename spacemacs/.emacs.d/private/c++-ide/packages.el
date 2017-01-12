@@ -38,7 +38,8 @@
     flycheck
     flycheck-irony
     google-c-style
-    gtags
+    ;; gtags
+    irony
     rtags
     )
   "The list of Lisp packages required by the c++-ide layer.
