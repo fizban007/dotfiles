@@ -33,13 +33,13 @@
   '(
     cc-mode
     cmake-ide
-    company
+    ;; company
     company-irony
     company-irony-c-headers
     flycheck
     flycheck-irony
     google-c-style
-    gtags
+    ;; gtags
     irony
     rtags
     )
