@@ -39,4 +39,41 @@
 ;; find file as root
 (global-set-key (kbd "C-x F") 'find-file-as-root)
 
+;; Neotree bindings
+;; (evilified-state-evilify-map neotree-mode-map
+;;   :mode neotree-mode
+;;   :bindings
+;;   (kbd "TAB")  'neotree-stretch-toggle
+;;   (kbd "RET") 'neotree-enter
+;;   (kbd "|") 'neotree-enter-vertical-split
+;;   (kbd "-") 'neotree-enter-horizontal-split
+;;   (kbd "'") 'neotree-quick-look
+;;   (kbd "c") 'neotree-create-node
+;;   (kbd "C") 'neotree-copy-node
+;;   (kbd "d") 'neotree-delete-node
+;;   (kbd "gr") 'neotree-refresh
+;;   (kbd "j") 'spacemacs/neotree-collapse-or-up
+;;   (kbd "J") 'neotree-select-previous-sibling-node
+;;   (kbd "k") 'neotree-next-line
+;;   (kbd "K") 'neotree-select-down-node
+;;   (kbd "h") 'neotree-previous-line
+;;   (kbd "H") 'neotree-select-up-node
+;;   (kbd "l") 'spacemacs/neotree-expand-or-open
+;;   (kbd "L") 'neotree-select-next-sibling-node
+;;   (kbd "q") 'neotree-hide
+;;   (kbd "r") 'neotree-rename-node
+;;   (kbd "R") 'neotree-change-root
+;;   (kbd "?") 'spacemacs/neotree-transient-state/body
+;;   (kbd "s") 'neotree-hidden-file-toggle)
+;; (global-set-key (kbd "<f8>") 'neotree-toggle)
+(with-eval-after-load 'neotree
+  (evil-define-key 'evilified neotree-mode-map (kbd "j") 'spacemacs/neotree-collapse-or-up)
+  (evil-define-key 'evilified neotree-mode-map (kbd "J") 'neotree-select-previous-sibling-node)
+  (evil-define-key 'evilified neotree-mode-map (kbd "k") 'neotree-next-line)
+  (evil-define-key 'evilified neotree-mode-map (kbd "K") 'neotree-select-down-node)
+  (evil-define-key 'evilified neotree-mode-map (kbd "h") 'neotree-previous-line)
+  (evil-define-key 'evilified neotree-mode-map (kbd "H") 'neotree-select-up-node)
+  (global-set-key (kbd "<f8>") 'neotree-toggle)
+  )
+
 ;;; keybindings.el ends here

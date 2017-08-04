@@ -86,7 +86,7 @@ Each entry is either:
            (((output-dvi style-pstricks)
              "dvips and gv")
             (output-dvi "xdvi")
-            (output-pdf "PDF Tools")
+            (output-pdf "Okular")
             (output-html "xdg-open")))))
 
   (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)
