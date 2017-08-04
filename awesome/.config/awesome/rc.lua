@@ -664,7 +664,7 @@ end
 --}}}
 
 -- {{{ Menu
-require("freedesktop/freedesktop")
+local freedesktop = require("freedesktop")
 -- }}}
 
 -- Old config
@@ -688,7 +688,7 @@ cpuicon:set_image(beautiful.widget_cpu)
 cpugraph  = awful.widget.graph()
 --cputhermal = wibox.widget.textbox()
 --cputhermal2 = wibox.widget.textbox()
-cputhermal = lain.widgets.temp({
+cputhermal = lain.widget.temp({
     timeout = 13,
     settings = function()
         widget:set_text("" .. coretemp_now .. "°C")
@@ -714,7 +714,7 @@ vicious.register(cpugraph,  vicious.widgets.cpu,     "$1")
 --baticon = widget({ type = "imagebox" })
 baticon = wibox.widget.imagebox()
 baticon:set_image(beautiful.widget_bat)
-batwidget = lain.widgets.bat({
+batwidget = lain.widget.bat({
     settings = function()
         if bat_now.perc == "N/A" then
             widget:set_markup("AC")

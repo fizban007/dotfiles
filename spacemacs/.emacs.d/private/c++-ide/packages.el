@@ -175,10 +175,10 @@ Each entry is either:
     (add-hook 'c-mode-common-hook (lambda () (progn
                                                ;; block other checkers except flycheck-irony
                                                (add-to-list 'flycheck-disabled-checkers 'c/c++-clang)
-                                               (add-to-list 'flycheck-disabled-checkers 'c/c++-cppcheck)
+                                               ;; (add-to-list 'flycheck-disabled-checkers 'c/c++-cppcheck)
                                                (add-to-list 'flycheck-disabled-checkers 'c/c++-gcc)
                                                ;; (setq flycheck-cppcheck-language-standard "c++11")
-                                               )))))
+                                               (add-to-list 'flycheck-enabled-checkers 'c/c++-cppcheck))))))
 
 
 ;;; packages.el ends here
