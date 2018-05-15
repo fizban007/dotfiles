@@ -33,13 +33,16 @@
   '(
     cc-mode
     cmake-ide
-    company-irony
-    company-irony-c-headers
+    ycmd
+    company-ycmd
+    ;; company-irony
+    ;; company-irony-c-headers
     flycheck
-    flycheck-irony
+    flycheck-ycmd
+    ;; flycheck-irony
     google-c-style
     ;; gtags
-    irony
+    ;; irony
     rtags
     )
   "The list of Lisp packages required by the c++-ide layer.
@@ -69,39 +72,68 @@ Each entry is either:
       - A list beginning with the symbol `recipe' is a melpa
         recipe.  See: https://github.com/milkypostman/melpa#recipe-format")
 
-(defun c++-ide/init-irony ()
-  (use-package irony
+;; (defun c++-ide/init-irony ()
+;;   (use-package irony
+;;     :defer t
+;;     :commands (irony-mode)
+;;     :init
+;;     (progn
+;;       (add-hook 'c++-mode-hook 'irony-mode)
+;;       (add-hook 'c-mode-hook 'irony-mode)
+;;       (add-hook 'objc-mode-hook 'irony-mode))
+;;     :config
+;;     (progn
+;;       ;; replace the `completion-at-point' and `complete-symbol' bindings in
+;;       ;; irony-mode's buffers by irony-mode's function
+;;       (defun c++-ide-irony-mode-hook ()
+;;         (define-key irony-mode-map [remap completion-at-point]
+;;           'irony-completion-at-point-async)
+;;         (define-key irony-mode-map [remap complete-symbol]
+;;           'irony-completion-at-point-async)
+;;         (setq company-backends (remove 'company-clang company-backends))
+;;         (add-to-list 'company-backends 'company-irony)
+;;         (add-to-list 'company-backends 'company-irony-c-headers))
+;;       (add-hook 'irony-mode-hook 'c++-ide-irony-mode-hook)
+;;       (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
+;;       )))
+
+(defun c++-ide/init-ycmd ()
+  (use-package ycmd
     :defer t
-    :commands (irony-mode)
+    :commands (ycmd-mode)
     :init
     (progn
-      (add-hook 'c++-mode-hook 'irony-mode)
-      (add-hook 'c-mode-hook 'irony-mode)
-      (add-hook 'objc-mode-hook 'irony-mode))
+      (add-hook 'c++-mode-hook 'ycmd-mode)
+      (add-hook 'c-mode-hook 'ycmd-mode))
     :config
     (progn
-      ;; replace the `completion-at-point' and `complete-symbol' bindings in
-      ;; irony-mode's buffers by irony-mode's function
-      (defun c++-ide-irony-mode-hook ()
-        (define-key irony-mode-map [remap completion-at-point]
-          'irony-completion-at-point-async)
-        (define-key irony-mode-map [remap complete-symbol]
-          'irony-completion-at-point-async)
-        (setq company-backends (remove 'company-clang company-backends))
-        (add-to-list 'company-backends 'company-irony)
-        (add-to-list 'company-backends 'company-irony-c-headers))
-      (add-hook 'irony-mode-hook 'c++-ide-irony-mode-hook)
-      (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
+      (set-variable 'ycmd-server-command '("python2" "/usr/share/vim/vimfiles/third_party/ycmd/ycmd"))
+      ;; (set-variable 'ycmd-global-config "/path/to/global_config.py")
+      (setq ycmd-extra-conf-whitelist '("~/Projects/*"))
       )))
 
-(defun c++-ide/init-flycheck-irony ()
-  (use-package flycheck-irony
+(defun c++-ide/init-company-ycmd ()
+  (use-package company-ycmd
     :init
-    (eval-after-load 'flycheck
-      '(add-hook 'flycheck-mode-hook #'flycheck-irony-setup))))
+    (company-ycmd-setup)))
 
-(defun c++-ide/init-company-irony-c-headers ()
-  (use-package company-irony-c-headers))
+;; (defun c++-ide/init-flycheck-irony ()
+;;   (use-package flycheck-irony
+;;     :init
+;;     (eval-after-load 'flycheck
+;;       '(add-hook 'flycheck-mode-hook #'flycheck-irony-setup))))
+
+;; (defun c++-ide/init-company-irony ()
+;;   (eval-after-load 'company
+;;     '(add-to-list 'company-backends 'company-irony)))
+
+;; (defun c++-ide/init-company-irony-c-headers ()
+;;   (use-package company-irony-c-headers))
+
+(defun c++-ide/init-flycheck-ycmd ()
+  (use-package flycheck-ycmd
+    :init
+    (flycheck-ycmd-setup)))
 
 (defun c++-ide/init-rtags ()
   (use-package rtags
@@ -139,19 +171,14 @@ Each entry is either:
     (add-to-list 'evil-emacs-state-modes 'rtags-mode)
     ))
 
-(defun c++-ide/init-company-irony ()
-  (use-package company-irony))
+;; (defun c++-ide/init-company-irony ()
+;;   (use-package company-irony))
 
-(defun c++-ide/init-cmake-ide ()
-  (use-package cmake-ide
-    :defer t
-    :commands (cmake-ide-setup)
-    :init
-    (progn
-      (add-hook 'c-mode-common-hook (lambda ()
-                                      (cmake-ide-setup)
-                                      ))
-      )))
+(defun c++-ide/post-init-cmake-ide ()
+  (add-hook 'c-mode-common-hook (lambda ()
+                                  (cmake-ide-setup)
+                                  ))
+  )
 
 (defun c++-ide/init-google-c-style ()
   (when c++-ide-use-google-c-style
