@@ -52,6 +52,86 @@ path() {
     print }"
 }
 
+# -------------------------------------------------------------------
+# Function to use percol to search zsh history
+# -------------------------------------------------------------------
+function exists { which $1 &> /dev/null }
+
+if exists percol; then
+    function percol_select_history() {
+        local tac
+        exists gtac && tac="gtac" || { exists tac && tac="tac" || { tac="tail -r" } }
+        BUFFER=$(fc -l -n 1 | eval $tac | percol --query "$LBUFFER")
+        CURSOR=$#BUFFER         # move cursor
+        zle -R -c               # refresh
+    }
+
+    zle -N percol_select_history
+    bindkey '^R' percol_select_history
+fi
+
+# -------------------------------------------------------------------
+# Functions using percol to grep or kill a program
+# -------------------------------------------------------------------
+function ppgrep() {
+    if [[ $1 == "" ]]; then
+        # PERCOL="percol --rcfile=~/.percol.d/rc.py"
+        PERCOL="percol"
+    else
+        PERCOL="percol --query $1"
+    fi
+    ps aux | eval $PERCOL | awk '{ print $2 }'
+}
+
+function ppkill() {
+    if [[ $1 =~ "^-" ]]; then
+        QUERY=""            # options only
+    else
+        QUERY=$1            # with a query
+        [[ $# > 0 ]] && shift
+    fi
+    ppgrep $QUERY | xargs kill $*
+}
+
+# -------------------------------------------------------------------
+# Function to du and sort by size
+# -------------------------------------------------------------------
+function duf {
+du -sk "$@" | sort -n | while read size fname; do for unit in k M G T P E Z Y; do if [ $size -lt 1024 ]; then echo -e "${size}${unit}\t${fname}"; break; fi; size=$((size/1024)); done; done
+}
+
+function aa_mod_parameters () 
+{ 
+    N=/dev/null;
+    C=`tput op` O=$(echo -en "\n`tput setaf 2`>>> `tput op`");
+    for mod in $(cat /proc/modules|cut -d" " -f1);
+    do
+        md=/sys/module/$mod/parameters;
+        [[ ! -d $md ]] && continue;
+        m=$mod;
+        d=`modinfo -d $m 2>$N | tr "\n" "\t"`;
+        echo -en "$O$m$C";
+        [[ ${#d} -gt 0 ]] && echo -n " - $d";
+        echo;
+        for mc in $(cd $md; echo *);
+        do
+            de=`modinfo -p $mod 2>$N | grep ^$mc 2>$N|sed "s/^$mc=//" 2>$N`;
+            echo -en "\t$mc=`cat $md/$mc 2>$N`";
+            [[ ${#de} -gt 1 ]] && echo -en " - $de";
+            echo;
+        done;
+    done
+}
+
+function showbat
+{
+    if [[ $1 == "" ]]; then
+       NUM=0
+    else
+       NUM=$1
+    fi
+    upower -i "/org/freedesktop/UPower/devices/battery_BAT$NUM"
+}
 
 
 # vim:ft=zsh
