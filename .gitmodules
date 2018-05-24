@@ -1,6 +1,3 @@
 [submodule "spacemacs/.emacs.d/private/arxiv/local/arxiv-mode"]
 	path = spacemacs/.emacs.d/private/arxiv/local/arxiv-mode
 	url = git@github.com:fizban007/arxiv-mode.git
-[submodule "awesome/.config/awesome/awesome-copycats"]
-	path = awesome/.config/awesome/awesome-copycats
-	url = git@github.com:lcpz/awesome-copycats.git
