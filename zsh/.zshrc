@@ -62,4 +62,5 @@ unsetopt correct_all
 setopt IGNORE_EOF
 source ~/.zsh/aliases.zsh
 source ~/.zsh/exports.zsh
-source ~/scripts/z.sh
+source ~/.zsh/functions.zsh
+source ~/.zsh/completion.zsh
