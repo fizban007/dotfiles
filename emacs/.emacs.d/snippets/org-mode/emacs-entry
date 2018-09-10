@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: Orgemacs-entry
+# key: orgemacs
+# binding: direct-keybinding
+# --
+*** Elisp code
+#+BEGIN_SRC emacs-lisp :tangle ~/.emacs.d/init.d/${1:filename}
+$0
+#+END_SRC
+*** Include into main file
+#+BEGIN_SRC emacs-lisp
+(load-file "~/.emacs.d/init.d/$1")
+#+END_SRC

@@ -1,0 +1,1260 @@
+#+TITLE: Unified Emacs Init Description
+#+AUTHOR: Alex Chen
+#+PROPERTY: header-args:emacs-lisp :tangle yes
+#+PROPERTY: mkdirp yes
+#+OPTIONS: toc:2 num:nil ^:nil
+
+* Introduction
+This is a new effort of making a unified and portable Emacs init configuration
+using org-mode. The idea is to have a simple =emacs.el= in =.emacs.d= directory,
+which is the result of tangling all the components from this self-documenting
+org file. At the same time, this file will act as a documentation of whatever is
+going into the =emacs.el= init file.
+
+The way to use this file with a vanilla emacs installation is to put this file
+in =~/.emacs.d=, open it in emacs, and tangle it using =C-c C-v t=. The result
+is a file named =emacs.el= in your =~/.emacs.d= folder. Now you can simply
+symlink it to either =~/.emacs= or =~/.emacs.d/init.el=. Your emacs will now
+load this configuration file by default.
+
+There is also the option of using =org-babel-load-file= to load this org file in
+the init script, but I dislike that because you need to enable package before
+doing it. I would like to define things before loading packages and it's
+impossible to do with the =org-babel-load-file= approach.
+
+* General Settings
+The settings here are independent of any external packages, but rather
+how Emacs itself behaves. They are added here before any
+package-specific settings because these are more general. However, the
+generalness is somewhat subjective here, and some of the settings
+might be better suited elsewhere? Time is needed to decide such things.
+
+** Lexical binding
+Emacs used to not have lexical binding, and everything has dynamic
+scope (read: global scope). As of Emacs 24, lexical binding can be
+turned on for a specific buffer by the following line at the beginning
+of the file:
+
+#+BEGIN_SRC emacs-lisp
+;; -*- lexical-binding: t -*-
+#+END_SRC
+
+The comparison of lexical vs dynamic binding is summarized pretty well
+in [[http://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding][this article]] on Emacs wiki. In general dynamic binding is dispised
+by most programmers, and people quote this as one of the weaknesses of
+Emacs-lisp. Therefore it is desirable to have this line at the
+beginning of our =init.el=.
+
+** Personal Settings
+First things first. These settings are basically "who-i-am" and
+"where-i-am" settings and independent of any external packages. I just
+want to put them here and have them out of the way. The content of the
+settings are pretty self-explanatory.
+
+#+BEGIN_SRC emacs-lisp
+(setq user-full-name "Alex Chen")
+(setq user-mail-address "fizban007@gmail.com")
+(setq user-organization "Princeton University")
+
+(set-language-environment "English")
+
+(prefer-coding-system 'utf-8)
+#+END_SRC
+
+** Convenience Settings
+Here are some settings which are generally good but somehow is not
+turned on by default in vanilla Emacs (one of the reasons why
+beginners starting with Emacs find it a monster to use).
+
+#+BEGIN_SRC emacs-lisp
+  ;; Change the yes or no dialog to y or n
+  (defalias 'yes-or-no-p 'y-or-n-p)
+
+  ;; Don't create backup-files
+  (setq make-backup-files nil) ; stop creating those backup~ files
+  (setq auto-save-default nil) ; stop creating those #auto save# files
+
+  ;; Disable annoying startup-stuff
+  (setq inhibit-startup-message t
+        inhibit-startup-echo-area-message t)
+
+  ;; Isearch put you at the beginning of the word
+  (add-hook 'isearch-mode-end-hook 'my-goto-match-beginning)
+  (defun my-goto-match-beginning () 
+    (when isearch-forward (goto-char isearch-other-end)))
+
+  ;; scroll one line at a time (less "jumpy" than defaults)
+  (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
+  (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+  (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+  (setq scroll-step 1) ;; keyboard scroll one line at a time
+  (setq scroll-conservatively 10000)
+
+  ;; when pasting with middle click in Linux X11, set to paste at cursor
+  ;; position, not at click position
+  (setq mouse-yank-at-point t)
+
+  ;; Find file as root
+  (defun find-file-as-root ()
+    "Like `ido-find-file, but automatically edit the file with
+    root-privileges (using tramp/sudo), if the file is not writable by
+    user."
+    (interactive)
+    (let ((file (read-file-name "Edit as root: ")))
+      (unless (file-writable-p file)
+        (setq file (concat "/sudo:root@localhost:" file)))
+      (find-file file)))
+  ;; give it some keybinding...
+  (global-set-key (kbd "C-x F") 'find-file-as-root)
+
+  ;; Use C-x C-e to evaluate region
+  (global-set-key (kbd "C-x C-e") 'eval-region)
+
+  ;; Pane manipulation, taken from the advice on Xah's blog
+  ;; (global-set-key (kbd "M-1") 'delete-other-windows) ; expand current pane
+  ;; (global-set-key (kbd "M-5") 'split-window-vertically) ; split pane top/bottom
+  ;; (global-set-key (kbd "M-4") 'split-window-horizontally) ; split pane top/bottom
+  ;; (global-set-key (kbd "M-3") 'delete-window) ; close current pane
+
+  ;; ;; Garbage collection, prevent gc for a longer period of time
+  (setq gc-cons-threshold 10000000)
+
+  ;; Auto revert buffers which are modified elsewhere
+  (global-auto-revert-mode 1)
+
+  ;; Don't save kill-ring to the x clipboard. This avoids some error at exit
+  (setq x-select-enable-clipboard-manager nil) 
+
+  ;; Don't produce an additional window for Ediff, but keep it in the same frame
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+  (setq ediff-split-window-function 'split-window-horizontally)
+  ;; When you quit an Ediff session with q, it just leaves the two diff
+  ;; windows around, instead of restoring the window configuration from
+  ;; when Ediff was started. Here's the (slightly hacky) code to restore
+  ;; the old window configuration:
+  (winner-mode)
+  (add-hook 'ediff-after-quit-hook-internal 'winner-undo)
+
+  ;; wrap email body
+  (add-hook 'mail-mode-hook 'turn-on-auto-fill)
+
+  ;; Searches ignore case
+  (setq case-fold-search t)
+#+END_SRC
+
+=ibuffer= is a built-in command in Emacs since Emacs 22. It is a
+drastically improved buffer list such that there is no reason to use
+the old one anymore. However, somehow the default is still the ugly
+old buffer list. We rebind it here
+#+BEGIN_SRC emacs-lisp
+(require 'ibuffer)
+;; iBuffer binding
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+#+END_SRC
+
+This block makes the "beginning of line" of vanilla Emacs smarter. It
+is taken from [[http://emacsredux.com/blog/2013/05/22/smarter-navigation-to-the-beginning-of-a-line/][here]].
+#+BEGIN_SRC emacs-lisp
+(defun smarter-move-beginning-of-line (arg)
+  "Move point back to indentation of beginning of line.
+
+Move point to the first non-whitespace character on this line.
+If point is already there, move to the beginning of the line.
+Effectively toggle between the first non-whitespace character and
+the beginning of the line.
+
+If ARG is not nil or 1, move forward ARG - 1 lines first.  If
+point reaches the beginning or end of the buffer, stop there."
+  (interactive "^p")
+  (setq arg (or arg 1))
+
+  ;; Move lines first
+  (when (/= arg 1)
+    (let ((line-move-visual nil))
+      (forward-line (1- arg))))
+
+  (let ((orig-point (point)))
+    (back-to-indentation)
+    (when (= orig-point (point))
+      (move-beginning-of-line 1))))
+
+;; remap C-a to `smarter-move-beginning-of-line'
+(global-set-key [remap move-beginning-of-line]
+                'smarter-move-beginning-of-line)
+#+END_SRC
+
+This short block checks whether the file under edit contains a
+shebang (e.g. =#!/bin/bash=), and if yes, makes it executable.
+#+BEGIN_SRC emacs-lisp
+(add-hook 'after-save-hook
+  'executable-make-buffer-file-executable-if-script-p)
+#+END_SRC
+
+The variable redisplay-dont-pause, when set to t, will cause Emacs to
+fully redraw the display before it processes queued input events. This
+may have slight performance implications if you’re aggressively mouse
+scrolling a document or rely on your keyboard’s auto repeat
+feature. For most of us, myself included, it’s probably a no-brainer
+to switch it on.
+#+BEGIN_SRC emacs-lisp
+(setq redisplay-dont-pause t)
+#+END_SRC
+
+The following code snippet is found [[http://www.blogbyben.com/2015/04/the-joy-of-elisp-powered-code-review.html][here]]. It copies the region of code
+selected to the clipboard and annotate it with the file name and line
+number, along with a bunch of ascii art around it.
+#+BEGIN_SRC emacs-lisp
+  ;; Perform a perl-like chomp
+  (defun chomp (str)
+    "Chomp leading and tailing whitespace from STR."
+    (replace-regexp-in-string (rx (or (: bos (* (any " \t\n")))
+                                      (: (* (any " \t\n")) eos)))
+                              ""
+                              str))
+
+  ;; code review
+  (defun code-review-region (beg end)
+    (interactive "r")
+    (let* ((text (chomp (buffer-substring-no-properties beg end)))
+           (line-number (line-number-at-pos))
+           (file (buffer-file-name))
+           (path (replace-regexp-in-string "^.*branches/" ""
+                                           (replace-regexp-in-string 
+                                            "^.*trunk/" "" file))))
+       (with-temp-buffer
+         (insert text)
+         (goto-char (point-min))
+         (while (re-search-forward "^" nil t)
+           (replace-match "| " nil nil))
+         (goto-char (point-min))
+         (insert (format "+---[%s:%s]\n" path line-number))
+         (goto-char (point-max))
+         (insert "\n+---\n")
+         (kill-region (point-min) (point-max)))))
+#+END_SRC
+
+* Package Repositories
+Now we configure external packages for emacs. This is done using the
+excellent package management tool that comes with emacs itself. First
+we need to set up some package repositories to establish a consistent
+way to get packages. We use the official gnu repo, as well as the
+third-party melpa and marmalade repos. From [[http://toumorokoshi.github.io/emacs-from-scratch-part-2-package-management.html][this source]], the
+difference between these two repos and the official repo is that:
+
++ melpa is a package archive managed by Milkypostman. It's the easiest
+  package archive to add packages to, and is automatically updated
+  when the package is. The go-to source for up to date, and the vast
+  majority of, packages. However it's worth noting that with
+  cutting-edge comes instability, so that is a risk of stability one
+  should be aware of. It's worth noting I've never been broken for any
+  package I've installed via melpa, however.
+
++ marmalade is another third-party package manager. Marmalade tends to
+  be more stable, due to the requirement that developers explicitely
+  upload new versions of their packages.
+ 
+The general trend is that for stability gnu > marmalade > melpa, while
+for cutting-edgedness melpa > marmalade > gnu. From Emacs 24.4, the
+package manager allows the user to specify which version to install
+when there are several different versions of the same package on
+different repos. This comes in rather handy for someone who wants to
+prefer some package to be stable while others being cutteng-edge.
+
+Package management is done through the official =package.el=.
+#+BEGIN_SRC emacs-lisp
+(require 'package)
+
+(add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
+(add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
+(add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
+
+(package-initialize)
+(require 'cl)
+#+END_SRC
+
+After =(package-initialize)= all the directories under
+=~/.emacs.d/elpa= will be added to the load-path, and therefore the
+packages become accessible from Emacs. Most of the other packages will
+no longer need to set their load-path anymore.
+
+We use =use-package= to manage all our packages. All packages are installed
+on-demand, therefore the installation and configuration are at the same place.
+
+** Use-package
+=use-package= is a package to simplify loading packages. Instead of
+littering the init file with a huge number of =require= commands, one
+can use the =use-package= command to selectively load packages and
+defer their initialization until the package is actually needed. The
+full documentation can be found on the [[https://github.com/jwiegley/use-package][official website]].
+#+BEGIN_SRC emacs-lisp
+  ;; The first line is to prevent problems with use-package
+  (require 'ert)
+  (when (not (package-installed-p 'use-package))
+    (progn
+      (package-refresh-contents)
+      (package-install 'use-package)))
+  (eval-when-compile
+    (require 'use-package))
+  (require 'bind-key)
+#+END_SRC
+
+* Look and Feel
+This section loads themes and alters the looks of Emacs. To be honest,
+vanilla Emacs looks like crap while it could have looked so much
+better with just a few packages loaded. 
+
+** Definitions
+The default font I found to be best looking is Consolas. Others don't
+even come close. It might be tricky to get a proper version of it
+though, since it is propietary. This block tries to find Consolas in
+the list of font families in the system. If it is found then we set it
+as the default font for both the initial frame and any new frame that
+Emacs creates.
+
+Edit: This method has problems with =emacs --daemon= since if Emacs is
+started in daemon mode then it will not see the font. Now the font is
+mandatory and set to Consolas by default.
+
+Edit: Want to take Menlo font for a spin. Although Menlo is a
+propietary font, it can be found somewhere on the internet, and it
+turns out to be really good. The letters are full and clear, and the
+spacing are just right too.
+
+Edit: Now my preferred font is Monaco, which by the way is also a
+propietary font. If it is not in your system then maybe the default
+monospace font will be used.
+
+#+BEGIN_SRC emacs-lisp
+  ;; (add-to-list 'initial-frame-alist '(font . "Monaco-10"))
+  ;; (add-to-list 'default-frame-alist '(font . "Monaco-10"))
+  (add-to-list 'initial-frame-alist '(font . "Source Code Pro-10"))
+  (add-to-list 'default-frame-alist '(font . "Source Code Pro-10"))
+  ;; (defvar my-font-family "Monaco")
+  (defvar my-font-family "Source Code Pro")
+  (defvar my-font-size 90)
+#+END_SRC
+
+** Line Numbers
+For Emacs 26 and later, =display-line-numbers-mode= is available. This is what
+we use here. For reference see [[https://www.emacswiki.org/emacs/LineNumbers]]
+
+#+BEGIN_SRC emacs-lisp
+(global-display-line-numbers-mode)
+#+END_SRC
+
+** Spaceline
+This is the package that provides Spacemacs with its famous mode-line
+theme. It has been extracted as an independent package for general fun
+and profit.
+
+#+BEGIN_SRC emacs-lisp
+(use-package spaceline
+  :ensure t
+  :init
+  (progn
+    (require 'spaceline-config)
+    (spaceline-emacs-theme)))
+#+END_SRC
+
+While we are at it, also include =diminish= which is a way to simplify
+minor modes in the mode line.
+
+#+BEGIN_SRC emacs-lisp
+(use-package diminish
+  :ensure t)
+#+END_SRC
+
+** Theme
+The best theme I have found up to now is Solarized. It comes in both
+dark and light variants and while I prefer the dark version for most
+of the time, the light version is useful when editting in some light
+conditions. The following code loads =solarized-dark= as the default
+theme.
+
+#+BEGIN_SRC emacs-lisp
+(defun my-load-theme (&optional frame)
+    ;; (use-package moe-theme
+    ;;   :ensure t)
+    ;; (use-package atom-one-dark-theme
+      ;; :ensure t
+      ;; :init
+        ;; (load-theme 'atom-one-dark t))
+    (use-package spacemacs-common
+      :ensure spacemacs-theme
+      :config
+        (load-theme 'spacemacs-dark t))
+
+    ;; Show highlighted buffer-id as decoration. (Default: nil)
+    ;; (setq moe-theme-highlight-buffer-id t)
+
+    ;; (moe-dark)
+    ;; (powerline-moe-theme)
+    ;; (sml/apply-theme sml/theme)
+    ;; (set-frame-parameter frame
+    ;;                      'background-mode
+    ;;                      'dark)
+    ;; (enable-theme 'solarized)
+    ;; Remove modeline under and over lines
+    ;; (set-face-attribute
+    ;; 'mode-line nil
+    ;; :underline nil
+    ;; :overline nil)
+    ;; (set-face-attribute
+    ;; 'mode-line-inactive nil
+;; 
+    ;; :underline nil
+    ;; :overline nil)
+)
+
+;; (if (daemonp)
+;;     (add-hook 'after-make-frame-functions
+;;               (lambda (frame)
+;;                 (my-load-theme)))
+;;   (my-load-theme))
+;; (add-hook 'after-make-frame-functions
+;;           (lambda (frame)
+;;             (my-load-theme frame)))
+(my-load-theme)
+#+END_SRC
+
+Note that Solarized theme will require 24bit color support in
+terminal, otherwise it is very difficult to get the same look-and-feel
+even when the terminal is set to Solarized theme. Even in emacs 24.4
+the patch for 24bit color support is not merged into trunk, so one
+either needs to compile emacs with the patch, or just switch to
+another theme when using emacs in terminal.
+
+The only use case I need for emacs to run in terminal is to remotely
+edit a file. But now I start to use tramp a lot more often so that I
+can use the local emacs installation to edit it, circumventing the
+need to invoke emacs in terminal.
+
+** Colorizing Compilation Buffer
+This setting enables ansi-color in compilation buffer. Very useful
+especially with cmake generated makefiles.
+#+BEGIN_SRC emacs-lisp
+  (setq compilation-scroll-output 'first-error)
+  
+  (require 'ansi-color)
+  (defun colorize-compilation-buffer ()
+    (toggle-read-only)
+    (ansi-color-apply-on-region (point-min) (point-max))
+    (toggle-read-only))
+  (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
+#+END_SRC
+
+** Other settings
+Here are uncategorized visual settings, most of them trivial. The
+reason they are not in the "General Settings" section is because they
+mostly deal with visuals.
+
+#+BEGIN_SRC emacs-lisp
+  ;; Hide the scroll bar
+  (scroll-bar-mode -1)
+
+  ;; Use C-c s to toggle visibility of scroll bar. The scroll bar is
+  ;; actually useful sometimes to get an analog feedback of where you
+  ;; are in the buffer
+  ;; (global-set-key (kbd "C-c s") 'scroll-bar-mode)
+
+  ;; Hide the menu bar
+  (menu-bar-mode -1)
+
+  ;; Hide the toolbar
+  (tool-bar-mode -1)
+
+  ;; Display time in mode line
+  (display-time)
+
+  ;; Show matching brackets. When smart-parens-mode is turned on, this
+  ;; will be disabled.
+  (show-paren-mode t)
+  (setq show-paren-style 'expression)
+
+  ;; Highlighting TODO, FIXME and BUG in programming modes
+  (add-hook 'prog-mode-hook
+            (lambda ()
+              (font-lock-add-keywords nil
+                                      '(("\\<\\(FIXME\\|TODO\\|BUG\\):" 1 font-lock-warning-face t)))
+              ))
+#+END_SRC
+
+* Evil mode with General and which-key
+The =evil-mode= in Emacs is a package that simulates Vim behavior. It
+is the best of its kind in that it almost fully simulates all of Vim's
+behavior by adding a modal layer on top of Emacs's editing
+facilities. It is purely because of this package that I successfully
+made the transition from Vim to Emacs, and I suppose it is the same
+story for many others as well. In fact, this has been proposed as The
+solution to the old Emacs problem: "Emacs is a pretty good operating
+system, but it could use a better text editor".
+
+=general.el= is the new evil-leader black. It makes it easy to
+implement leader keys, of any length you want. It also has nice
+integration with use-package and which-key. Its primary use is in
+combination with evil, but you can also use it with bare emacs.
+
+Therefore we dedicate a whole section in our config file to this
+particular mode/package. Also since I use [[http://colemak.com][Colemak]] keyboard config,
+there are quite a few things to tweak from the default configuration
+to satisfy my needs.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package which-key
+    :ensure t
+    :init
+    (which-key-mode)
+    :config
+    (which-key-setup-side-window-bottom)
+    (setq which-key-sort-order 'which-key-key-order-alpha
+	  which-key-side-window-max-width 0.33
+	  which-key-idle-delay 0.05))
+  ;; Set C-u to scroll up rather than a prefix like default emacs
+  (setq evil-want-C-u-scroll t)
+  (use-package evil
+    :ensure t
+    :init
+    (evil-mode 1)
+    :config
+    (progn 
+      (diminish 'undo-tree-mode "UT")
+      (add-hook 'prog-mode-hook 'hs-minor-mode)
+
+      (use-package general :ensure t
+	:init
+	(general-evil-setup t))
+
+      ;; This is supposed to be a great thing, but I seldom use it!
+      (use-package evil-surround
+	:ensure t
+	:init
+	(progn 
+	  (global-evil-surround-mode 1)
+	  (add-hook 'emacs-lisp-mode-hook (lambda ()
+					    (push '(?` . ("`" . "'")) evil-surround-pairs-alist)))
+	  (add-hook 'c++-mode-hook (lambda ()
+				     (push '(?< . ("< " . " >")) evil-surround-pairs-alist)))))
+      (defun evil-undefine ()
+	(interactive)
+	(let (evil-mode-map-alist)
+	  (call-interactively (key-binding (this-command-keys)))))
+
+      (add-to-list 'evil-emacs-state-modes 'arxiv-mode)
+      (add-to-list 'evil-emacs-state-modes 'eww-mode)
+      ;; Define general motion keys for colemak
+      (general-define-key
+	:states '(normal visual)
+	"C-e" 'evil-end-of-line
+	"k" 'evil-next-visual-line
+	"h" 'evil-previous-visual-line
+	"j" 'evil-backward-char)
+
+      (general-define-key
+	:states '(normal visual insert)
+	"C-f" 'evil-forward-char
+	"C-b" 'evil-backward-char
+	"C-n" 'evil-next-line
+	"C-p" 'evil-previous-line
+	"C-w" 'backward-kill-word
+	"C-y" 'yank
+	"C-k" 'kill-line
+	)
+      (general-define-key
+        :states '(insert emacs)
+        "C-e" 'end-of-line)
+
+      (define-key evil-visual-state-map "\C-k" 'kill-region)
+      (define-key evil-normal-state-map "Q" 'call-last-kbd-macro)
+      (define-key evil-visual-state-map "Q" 'call-last-kbd-macro)
+      ;; (define-key evil-normal-state-map (kbd "TAB") 'evil-undefine)
+      (define-key evil-normal-state-map "\M-." 'evil-undefine)
+      (define-key evil-normal-state-map "\C-t" 'evil-undefine)
+      (define-key evil-insert-state-map "\C-t" 'evil-undefine)
+      (define-key evil-normal-state-map "\C-v" 'evil-scroll-down)
+      (define-key evil-visual-state-map "\C-v" 'evil-scroll-down)
+      (define-key evil-normal-state-map "\M-v" 'evil-scroll-up)
+      (define-key evil-visual-state-map "\M-v" 'evil-scroll-up)
+      (define-key evil-normal-state-map "\C-\M-v" 'scroll-other-window)
+      (define-key evil-visual-state-map "\C-\M-v" 'scroll-other-windown)
+      (define-key evil-normal-state-map (kbd "DEL") 'evil-scroll-up)
+      (define-key evil-visual-state-map (kbd "DEL") 'evil-scroll-up)
+      (define-key evil-normal-state-map "zO" 'evil-open-folds)
+
+      ;; <<<tabbar-evil>>> Tabbar bindings in evil-mode
+      (define-key evil-normal-state-map "gt" 'tabbar-forward-tab)
+      (define-key evil-normal-state-map "gr" 'tabbar-backward-tab)
+
+      ;; <<<ace-jump-evil>>> Ace-jump bindings in evil-mode
+      ;; (define-key evil-normal-state-map " " 'ace-jump-char-mode)
+      ;; (define-key evil-visual-state-map " " 'ace-jump-char-mode)
+
+	  ;;; esc quits everything just like vim
+      (define-key evil-normal-state-map [escape] 'keyboard-quit)
+      (define-key evil-visual-state-map [escape] 'keyboard-quit)
+      (define-key minibuffer-local-map [escape] 'minibuffer-keyboard-quit)
+      (define-key minibuffer-local-ns-map [escape] 'minibuffer-keyboard-quit)
+      (define-key minibuffer-local-completion-map [escape] 'minibuffer-keyboard-quit)
+      (define-key minibuffer-local-must-match-map [escape] 'minibuffer-keyboard-quit)
+      (define-key minibuffer-local-isearch-map [escape] 'minibuffer-keyboard-quit)
+
+      ;; (define-key evil-normal-state-map (kbd "SPC") my-leader-map)
+
+      (use-package evil-nerd-commenter
+	:ensure t
+	:init
+	(progn
+	  (global-set-key (kbd "M-;") 'comment-dwim)
+	  (general-nvmap :prefix "SPC"
+	     "c SPC" 'evilnc-comment-or-uncomment-lines
+	     "cc" 'evilnc-copy-and-comment-lines
+	     "cl" 'evilnc-comment-or-uncomment-lines
+	  )))
+
+      ;; (evil-declare-key 'normal org-mode-map
+      (general-nmap 
+        :keymaps 'org-mode-map
+	:prefix "z"
+	  "a" 'org-cycle
+	  "A" 'org-shifttab
+	  "c" 'hide-subtree
+	  "C" 'org-hide-block-all
+	  "m" 'hide-body
+	  "o" 'show-subtree
+	  "O" 'show-all
+	  "r" 'show-all)
+      (general-define-key
+	:states '(normal visual insert emacs)
+	:keymaps 'org-mode-map
+	  "M-j" 'org-shiftleft
+	  "M-l" 'org-shiftright
+	  "M-J" 'org-metaleft
+	  "M-K" 'org-metadown
+	  "M-H" 'org-metaup
+	  "M-L" 'org-metaright)
+
+      ;; ECB compatibility settings
+      (add-hook 'ecb-history-buffer-after-create-hook 'evil-motion-state)
+      (add-hook 'ecb-directories-buffer-after-create-hook 'evil-motion-state)
+      (add-hook 'ecb-methods-buffer-after-create-hook 'evil-motion-state)
+      (add-hook 'ecb-sources-buffer-after-create-hook 'evil-motion-state)
+
+      ;; Start specific modes in specific evil modes
+      (loop for (mode . state) in '((inferior-emacs-lisp-mode . emacs)
+				    (nrepl-mode . insert)
+				    (pylookup-mode . emacs)
+				    (comint-mode . normal)
+				    (shell-mode . insert)
+				    (git-commit-mode . normal)
+				    (paradox-menu-mode . emacs)
+				    ;; (git-rebase-mode . emacs)
+				    (term-mode . emacs)
+				    (help-mode . emacs)
+				    (helm-grep-mode . emacs)
+				    (grep-mode . emacs)
+				    (bc-menu-mode . emacs)
+				    (magit-branch-manager-mode . emacs)
+				    (rdictcc-buffer-mode . emacs)
+				    (dired-mode . emacs)
+				    (compilation-mode . emacs)
+				    (wdired-mode . normal))
+	    do (evil-set-initial-state mode state))
+      ))
+  ;; (evilnc-default-hotkeys)
+
+#+END_SRC
+
+* Ivy and Counsel
+
+Just like helm or ido, ivy is a “generic completion framework”. It
+shines at being unobtrusive and really fast. Counsel is its derivative
+that works like helm.
+
+#+BEGIN_SRC emacs-lisp
+(use-package ivy :ensure t
+  :diminish (ivy-mode . "") ; does not display ivy in the modeline
+  :init (ivy-mode 1)        ; enable ivy globally at startup
+  :bind (:map ivy-mode-map  ; bind in the ivy buffer
+         ("C-'" . ivy-avy)) ; C-' to ivy-avy
+  :config
+  (setq ivy-use-virtual-buffers t)   ; extend searching to bookmarks and …
+  (setq ivy-height 20)               ; set height of the ivy window
+  (setq ivy-count-format "(%d/%d) ") ; count format, from the ivy help page
+  )
+
+(use-package counsel :ensure t
+  :bind*                           ; load counsel when pressed
+  (("M-x"     . counsel-M-x)       ; M-x use counsel
+   ("C-x C-f" . counsel-find-file) ; C-x C-f use counsel-find-file
+   ("C-x C-r" . counsel-recentf)   ; search recently edited files
+   ("C-c f"   . counsel-git)       ; search for files in git repo
+   ("C-c s"   . counsel-git-grep)  ; search for regexp in git repo
+   ("C-c /"   . counsel-ag)        ; search for regexp in git repo using ag
+   ("C-c l"   . counsel-locate)   ; search for files or else using locate
+   ("C-s"     . counsel-grep-or-swiper) ; search for something in the buffer
+  ))
+#+END_SRC
+
+* Yasnippet and Company
+Yasnippet is a snippet manager for Emacs. It works by expanding short
+specific keywords into predetermined structures which are called
+"snippets". For example, one can enter "src" in the =org-mode= buffer
+and press =TAB=, and yasnippet will expand "src" into the standard
+=org-mode= source block =#+BEGIN_SRC= ... =#+END_SRC=. It is very handy
+when entering repetitive code blocks or structures, and minimizes
+mistakes in the process.
+
+#+BEGIN_SRC emacs-lisp
+(use-package yasnippet 
+  :ensure t
+  :diminish "Y"
+  :init
+    (progn
+      (defun yas-advise-indent-function (function-symbol)
+        (eval `(defadvice ,function-symbol (around yas/try-expand-first activate)
+                 ,(format
+                   "Try to expand a snippet before point, then call `%s' as usual"
+                   function-symbol)
+                 (let ((yas/fallback-behavior nil))
+                   (unless (and (interactive-p)
+                                (yas-expand))
+                     ad-do-it)))))
+
+      (defun yas-my-initialize ()
+        (setq yas-indent-line 'auto)
+        (yas-advise-indent-function 'cdlatex-tab)
+        (yas-advise-indent-function 'org-cycle)
+        (yas-advise-indent-function 'org-try-cdlatex-tab)
+        (yas-load-directory "~/.emacs.d/snippets")
+        (yas-minor-mode-on))
+
+      (defalias 'yas/current-snippet-table 'yas--get-snippet-tables)
+      ;; Only turn on yasnippet for these modes
+      (add-hook 'org-mode-hook 'yas-my-initialize)
+      (add-hook 'c-mode-common-hook 'yas-my-initialize)
+      (add-hook 'python-mode-hook 'yas-my-initialize)
+      (add-hook 'haskell-mode-hook 'yas-my-initialize)
+  ))
+    ;;  (add-to-list 'ac-sources 'ac-source-yasnippet))
+    ;; (progn
+    ;;   ;; (yas-global-mode nil)
+    ;;   ;; (yas/minor-mode-on)
+    ;;   )
+#+END_SRC
+
+Company is an auto-complete framework for Emacs. There are two
+auto-complete frameworks in the wild there right now. One is the
+classic =auto-complete= which has been great but its programmer
+interface is said to be not very good. The other is =company-mode=
+which is short for "Complete-anything mode". I've been playing around
+with these two and while I haven't made up my mind yet, the C++
+completion by =company-mode= is currently having the upper hand. Here
+is the config:
+
+#+BEGIN_SRC emacs-lisp
+(use-package company
+  :ensure t
+  :diminish "C"
+  :init
+    (add-hook 'after-init-hook 'global-company-mode)
+  :config
+    (progn
+      (defun check-expansion ()
+	(save-excursion
+	  (if (looking-at "\\_>") t
+	    (backward-char 1)
+	    (if (looking-at "\\.") t
+	      (backward-char 1)
+	      (if (looking-at "::") t
+		;; (backward-char 1)
+		(if (looking-at "->") t
+		  (backward-char 1)
+		  (if (looking-at "->\ ") t nil)))))))
+
+      (defun do-yas-expand ()
+	(let ((yas/fallback-behavior 'return-nil))
+	  (yas/expand)))
+
+      (defun tab-indent-or-complete ()
+	(interactive)
+	(if (minibufferp)
+	    (minibuffer-complete)
+	  (if (or (not yas/minor-mode)
+		  (null (do-yas-expand)))
+	      (if (check-expansion)
+		  (company-complete-common)
+		(indent-for-tab-command)))))
+
+      (global-set-key (kbd "TAB") 'tab-indent-or-complete)
+      (defun my-setup-company ()
+	;; (setq company-backends (delete 'company-semantic company-backends))
+	;; (setq company-backends (delete 'company-eclim company-backends))
+	;; (add-to-list 'company-backends 'company-elisp)
+	(use-package company-c-headers :ensure t)
+	(add-to-list 'company-backends 'company-c-headers)
+	;; (add-to-list 'company-c-headers-path-system "/usr/include/c++/4.9.2/")
+	(setq company-idle-delay 0)
+	(define-key company-active-map (kbd "C-n") 'company-select-next)
+	(define-key company-active-map (kbd "C-p") 'company-select-previous)
+      )
+      (add-hook 'company-mode-hook 'my-setup-company)
+      ))
+#+END_SRC
+
+* Magit
+=magit= is the best git wrapper, period. It is actually much better
+than the official git interface, since the command line interface is a
+headache for most people. Magit makes interacting with git a
+breeze. The config is very simple too:
+#+BEGIN_SRC emacs-lisp
+(use-package magit
+  :ensure t
+  :commands magit-status
+  :init
+  (progn
+    (global-set-key (kbd "C-c g") 'magit-status)
+    ;; This line is to avoid setup warning message from magit
+    ;; (setq magit-last-seen-setup-instructions "1.4.0")
+))
+#+END_SRC
+
+The only drawback about =magit= is that, once you are used to it, it
+is hard to ever use git in command line any more. This makes remote
+managing a git repo without emacs a big hassle...
+
+* Projectile
+Projectile is a project management package for Emacs. For any
+directory with a =.git= at the root, it will automatically recognize
+it as a project. It has nice project navigation and integration with
+other packages such as =ag= and =counsel=. Here is actually a minimal
+setting with integration with counsel.
+#+BEGIN_SRC emacs-lisp
+  (use-package projectile
+    :ensure t
+    :init
+      (progn
+	(projectile-global-mode)
+	)
+    :config
+      (progn
+	(use-package counsel-projectile :ensure t)
+	(general-define-key
+	  :states '(normal visual insert)
+	  :prefix "C-c p"
+	  "a" 'counsel-projectile-ag
+	  "f" 'counsel-projectile-find-file
+	  "p" 'counsel-projectile-switch-project
+	  "g" 'counsel-projectile-find-file-dwim
+	  "b" 'counsel-projectile-switch-to-buffer
+	  "SPC" 'counsel-projectile
+	  )
+	(setq projectile-enable-caching t)
+	;; The following are commented out because they are in the custom file now
+	;; (add-to-list 'projectile-other-file-alist '("C" "h" "hpp"))
+	;; (add-to-list 'projectile-other-file-alist '("cu" "h" "cuh"))
+	;; (add-to-list 'projectile-other-file-alist '("cuh" "cu"))
+	))
+#+END_SRC
+
+* LaTeX
+
+Rather than a LaTeX package, there are quite a few packages working
+together here to provide the superior Emacs LaTeX editing
+experience. First is the big dependency which is AUCTeX:
+
+#+BEGIN_SRC emacs-lisp
+(use-package auctex
+  :ensure t
+  ;; use LaTeX mode for .tex files
+  :mode ("\\.tex\\'" . LaTeX-mode)
+  ;; Delay the configuratio until LaTeX mode is loaded
+  :config
+  (progn
+    ;; These are my customary settings
+    (defun my-initialize-latex ()
+
+    ;; Zotelo is a package which interacts with Zotero through the
+    ;; MozRepl console in firefox. It can directly draw references
+    ;; from your zotero collection.
+    (use-package zotelo :ensure t
+      :init
+      (add-hook 'LaTeX-mode-hook 'zotelo-minor-mode))
+
+
+    (setq TeX-auto-save t)
+    (setq TeX-parse-self t)
+    (setq-default TeX-master nil)
+
+    (setq reftex-plug-into-AUCTeX t)
+    (setq TeX-newline-function 'newline-and-indent)
+    ;; (setq TeX-engine 'xetex)
+    (setq TeX-PDF-mode t)
+
+    ;; Only change sectioning colour
+    (setq font-latex-fontify-sectioning 'color)
+
+    ;; super-/sub-script on baseline
+    (setq font-latex-script-display (quote (nil)))
+
+    (setq LaTeX-indent-level 4)
+
+    (setq TeX-auto-untabify t) ; Automatically remove all tabs from a file before saving it.
+
+    (setq TeX-math-close-double-dollar t)
+
+    (setq LaTeX-command-style '(("" "%(PDF)%(latex) -file-line-error %S%(PDFout)")))
+    (global-set-key (kbd "C-c +") 'cdlatex-item)
+
+    ;; These settings make evil folding work better with LaTeX mode
+    (defun evil-outline-folding-latex ()
+	(evil-define-command latex-evil-open-fold ()
+	    "Open one fold under the cursor."
+	    (outline-minor-mode)
+	    (show-children))
+	(evil-define-command latex-evil-close-fold ()
+	    "Close one fold under the cursor."
+	    (outline-minor-mode)
+	    (hide-children))
+	(evil-define-command latex-evil-open-folds-at-point ()
+	    "Open all folds under the cursor recursively."
+	    (outline-minor-mode)
+	    (show-subtree))
+	(evil-define-command latex-evil-close-folds-at-point ()
+	    "Close all folds under the cursor recursively."
+	    (outline-minor-mode)
+	    (hide-subtree))
+	(evil-define-command latex-evil-close-all-folds ()
+	    "Close all folds."
+	    (outline-minor-mode)
+	    (hide-sublevels 1))
+	(evil-define-command latex-evil-open-all-folds ()
+	    "Open all folds."
+	    (outline-minor-mode)
+	    (show-all))
+	(evil-define-command latex-evil-fold-more ()
+	    "Fold more."
+	    (outline-minor-mode)
+	    (when (> evil-fold-level 0)
+	    (decf evil-fold-level)
+	    (hide-sublevels (+ evil-fold-level 1))))
+	(evil-define-command latex-evil-fold-less ()
+	    "Reduce folding."
+	    (outline-minor-mode)
+	    (incf evil-fold-level)
+	    (hide-sublevels (+ evil-fold-level 1)))
+
+	(general-nmap 
+          :keymaps 'LaTeX-mode-map
+	  :prefix "z"
+	    "o" #'latex-evil-open-folds-at-point
+	    "O" #'latex-evil-open-fold
+	    "c" #'latex-evil-close-folds-at-point
+	    "C" #'latex-evil-close-fold
+	    "m" #'latex-evil-close-all-folds
+	    "M" #'latex-evil-open-all-folds
+	    "r" #'latex-evil-fold-less
+	    "R" #'latex-evil-fold-more))
+    (evil-outline-folding-latex)
+
+    ;; Here we configure synctex which provides bi-directional mapping
+    ;; between the pdf file and the latex source file. Clicking on the
+    ;; pdf file will allow you to jump to the corresponding line in
+    ;; the latex source, and vice versa.
+    (defun setup-synctex-latex ()
+    (setq TeX-source-correlate-method (quote synctex))
+    (setq TeX-source-correlate-mode t)
+    (setq TeX-source-correlate-start-server t)
+    (setq TeX-view-program-list
+	    (quote
+	    (("Okular" "okular --unique \"%o#src:%n$(pwd)/./%b\""))))
+    (setq TeX-view-program-selection
+	    (quote
+	    (((output-dvi style-pstricks)
+		"dvips and gv")
+	    (output-dvi "xdvi")
+	    (output-pdf "Okular")
+	    (output-html "xdg-open"))))))
+
+    (add-hook 'LaTeX-mode-hook 'my-initialize-latex)
+
+    (add-hook 'LaTeX-mode-hook (lambda ()
+				(TeX-fold-mode 1)))
+    (add-hook 'LaTeX-mode-hook 'visual-line-mode)
+    (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+    (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+    (add-hook 'LaTeX-mode-hook 'zotelo-minor-mode)
+    (add-hook 'LaTeX-mode-hook 'setup-synctex-latex)
+  ))
+#+END_SRC
+
+Then we install the =cdlatex.el=, which includes quite a few
+useful key bindings:
+#+BEGIN_SRC emacs-lisp
+(use-package cdlatex :ensure t
+  :init
+    (progn
+      (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
+      ;; (add-hook 'latex-mode-hook 'turn-on-cdlatex)   ; with Emacs latex mode
+    ))
+#+END_SRC
+
+Finally we install =pdf-tools= which is the best pdf viewer in Emacs
+#+BEGIN_SRC emacs-lisp
+;; pdf-tools is the best way to view pdf files in Emacs
+(use-package pdf-tools :ensure t
+    :init
+    (pdf-tools-install))
+#+END_SRC
+
+* Smartparens mode
+Simply turns on smart parens mode globally.
+#+BEGIN_SRC emacs-lisp
+(use-package smartparens
+  :ensure t
+  :init
+  ;; smartparens-config is the bundled sane default configuration
+  (require 'smartparens-config)
+  (smartparens-global-mode t)
+
+  ;; Hightlight matching pairs
+  (show-smartparens-global-mode t)
+
+  ;; In C++ mode, automatically insert a new line when pressing return
+  ;; in between a pair of curly braces
+  (sp-local-pair 'c++-mode "{" nil :post-handlers '((my-create-newline-and-enter-sexp "RET")))
+
+  (defun my-create-newline-and-enter-sexp (&rest _ignored)
+    "Open a new brace or bracket expression, with relevant newlines and indent. "
+    (newline)
+    (indent-according-to-mode)
+    (forward-line -1)
+    (indent-according-to-mode)))
+#+END_SRC
+
+* C/C++/Cuda
+First make =.h= files use C++ mode instead of C mode
+#+BEGIN_SRC emacs-lisp
+;; Treat all .h files as c++ files
+(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode)) 
+#+END_SRC
+
+Then we load =google-c-style=, =ggtags-mode=, and =cmake-ide=
+when entering C or C++ mode.
+#+BEGIN_SRC emacs-lisp
+(use-package google-c-style :ensure t)
+(use-package cmake-ide :ensure t)
+(use-package ggtags :ensure t)
+(add-hook 'c-mode-common-hook 
+  (lambda () (progn
+    (google-set-c-style)
+    (ggtags-mode 1)
+    (cmake-ide-setup)
+    (setq ggtags-enable-navigation-keys nil)
+    (setq company-backends (remove 'company-semantic company-backends))
+    (setq company-backends (remove 'company-clang company-backends))
+    (setq company-backends (remove 'company-xcode company-backends))
+    (setq company-backends (remove 'company-eclim company-backends))
+)))
+#+END_SRC
+
+Load the custom cuda-mode for cuda files
+#+BEGIN_SRC emacs-lisp
+(use-package cuda-mode :ensure t
+  :init
+    (autoload 'cuda-mode "cuda-mode" "Cuda Programming Mode." t)
+    (add-to-list 'auto-mode-alist '("\\.cu\\'" . cuda-mode))
+    (add-to-list 'auto-mode-alist '("\\.cuh\\'" . cuda-mode)))
+#+END_SRC
+
+Try out the package =highlight-doxygen= to see if it works well
+#+BEGIN_SRC emacs-lisp
+(use-package highlight-doxygen :ensure t
+  :init
+  (highlight-doxygen-global-mode 1))
+#+END_SRC
+
+Now initialize =ycmd= to do autocompletion
+#+BEGIN_SRC emacs-lisp
+(use-package ycmd :ensure t
+:defer t
+:commands (ycmd-mode)
+:init
+  (progn
+    (add-hook 'c++-mode-hook 'ycmd-mode)
+    (add-hook 'c-mode-hook 'ycmd-mode)
+    (add-hook 'cuda-mode-hook 'ycmd-mode))
+:config
+  (progn
+    (set-variable 'ycmd-server-command '("python2" "/usr/share/vim/vimfiles/third_party/ycmd/ycmd")
+    (use-package company-ycmd :ensure t
+      :init
+      (company-ycmd-setup))
+)))
+#+END_SRC
+
+* Org Mode
+This is the customization for =org-mode=.
+#+BEGIN_SRC emacs-lisp
+(use-package org :ensure t
+:init
+(progn
+  (setq org-directory "~/.org/")
+
+  ;; Org-babel hook
+  (add-hook 'org-mode-hook (lambda ()
+    ;; active Babel languages
+      (org-babel-do-load-languages
+	'org-babel-load-languages
+	'((haskell . t)
+	(python . t)
+	(shell . t)
+	(C . t)
+	(R . t)
+	(latex . t)
+	(emacs-lisp . t)
+	(scheme . t)
+	))
+	))
+    ;; Setting up templates for org-capture
+    (setq org-capture-templates
+	'(("t" "Todo" entry (file+headline "~/.org/newgtd.org" "Tasks")
+	    "* TODO %^{Brief Description}  %^g\n%?\nAdded: %U")
+	    ("n" "Notes" entry (file+datetree "~/.org/notes/notes.org")
+	    "* %^{Topic} \n%i%?\n")
+	    ("b" "Birthday" plain (file+headline "~/.org/birthday.org" "Birthdays")
+	    "\%\%%?\(org-anniversary  %^{Date}\) %^{Name} would be \%d years old.\n")
+	    ("w" "Post" entry (file+datetree "~/org-jekyll/org/cyr.org")
+	    "* %^{Title}  :blog:\n  :PROPERTIES:\n  :on: %T\n  :END:\n  %?\n  %x")
+	    ("k" "Tricks" entry (file+datetree "~/.org/tricks.org" "Tricks")
+	    "* %^{Topic}  :tricks:\n  :PROPERTIES:\n  :on: %T\n  :END:\n  %?\n  %x")
+	    ))
+
+    ;; Use cdlatex in org mode
+    (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+
+    ;; Add markdown export
+    ;; (add-to-list 'org-export-backends 'md)
+
+    ;; Add new todo keywords for all org-mode buffers
+    (setq org-todo-keywords
+	'((sequence "TODO(t)" "URGENT(u)" "STARTED(s)" "WAITING(w)" "MAYBE(m)" "|" "DONE(d)" "CANCELED(c)" "DEFERRED(d)")))
+
+    ;; Add new todo keyward faces
+    (setq org-todo-keyword-faces
+	'(("URGENT" . "red") ("TODO" . org-warning) ("STARTED" . "orange") ("APPT" . "lightblue") ("WAITING" . "lightgreen")))
+
+    ;; Check if all subentries are done
+    (add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
+
+    ;; Prevent problem with ^ and _ in cdlatex
+    (defalias 'last-command-char 'last-command-event)
+
+    ;; Misc settings
+    (setq org-use-fast-todo-selection t)
+    (setq org-confirm-babel-evaluate nil)
+
+    ;; Setting up publish
+    (use-package ox-html)
+    (use-package htmlize :ensure t)
+    (use-package ox-latex
+    :config
+    (progn
+	(add-to-list 'org-latex-packages-alist '("" "listings"))
+	(add-to-list 'org-latex-packages-alist '("" "color"))
+	(add-to-list 'org-latex-classes
+		    '("cyr-org-article"
+			"\\documentclass[11pt,letterpaper]{article}
+		\\usepackage{graphicx}
+		\\usepackage{amsmath}
+		\\usepackage{tikz}
+		\\usepackage{hyperref}
+		\\usepackage{geometry}
+		\\geometry{letterpaper, textwidth=6.7in, textheight=10in,
+			    marginparsep=7pt, marginparwidth=.6in}
+		\\pagestyle{empty}
+		\\title{}
+			[NO-DEFAULT-PACKAGES]
+			[PACKAGES]
+			[EXTRA]"
+			("\\section{%s}" . "\\section*{%s}")
+			("\\subsection{%s}" . "\\subsection*{%s}")
+			("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+			("\\paragraph{%s}" . "\\paragraph*{%s}")
+			("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+			))
+
+      ;; setup pandoc
+      (use-package ox-pandoc :ensure t
+        :config
+        (progn
+          (setq org-pandoc-options-for-beamer-pdf '((latex-engine . "xelatex")))
+          (setq org-pandoc-options-for-latex-pdf '((latex-engine . "xelatex")))
+          ))
+
+))
+#+END_SRC
+
+* Window Manipulation
+Here we define some convenient keys for window manipulation, mostly inspired by spacemacs
+#+BEGIN_SRC emacs-lisp
+(general-define-key
+  :states '(normal visual)
+  :prefix "SPC w"
+    "/" 'split-window-right
+    "-" 'split-window-below
+    "d" 'delete-window
+    "1" 'delete-other-windows
+)
+#+END_SRC
+
+Use =ace-window= for fast jump to specific window
+#+BEGIN_SRC emacs-lisp
+(use-package ace-window :ensure t
+  :init
+  (general-nvmap
+  "C-c w" 'ace-window)
+  (setq aw-scope 'frame)
+  (setq aw-ignore-current t)
+  (setq aw-dispatch-always t)
+)
+#+END_SRC
+
+
+* Custom File
+Emacs has a built-in customization interface. All the customizations
+done through it will be saved in the init file in a rather ugly form,
+and it is suggested that the user should not to modify that
+section. Since our init file is tangled from this org file, we want to
+keep that customization file separate. This can be done as follows:
+
+#+BEGIN_SRC emacs-lisp
+  ;; Set customized variables here
+  (setq custom-file "~/.emacs.d/custom.el")
+  (load custom-file)
+#+END_SRC
+
+Because customizations usually involves package specifics, we want to
+defer this block to the end of the initialization process. A side
+effect is that if the init process is somehow interrupted by an error,
+Emacs will not be able to see this file, therefore not able to write
+custom configs. This kind of behavior signals an error in one of the
+previous parts of initialization process, and you should examine it
+carefully to see where the problem is.
+
+* Start Server and Session Management
+After everything is settled, we need to start Emacs server and load
+the =session.el= to support cross-session history.
+#+BEGIN_SRC emacs-lisp
+  (use-package session
+    :ensure t)  
+  (add-hook 'after-init-hook 'session-initialize)
+  (load "server")
+  (unless (server-running-p)
+    (server-start))
+  ;; Maintain a list of recently opened files
+  (recentf-mode 1)
+  (setq recentf-max-menu-items 25)
+#+END_SRC
+
+* Unfinished
+*** TODO Various language modes
+    
