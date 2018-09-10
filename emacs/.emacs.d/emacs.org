@@ -372,49 +372,18 @@ conditions. The following code loads =solarized-dark= as the default
 theme.
 
 #+BEGIN_SRC emacs-lisp
-(defun my-load-theme (&optional frame)
-    ;; (use-package moe-theme
-    ;;   :ensure t)
-    ;; (use-package atom-one-dark-theme
-      ;; :ensure t
-      ;; :init
-        ;; (load-theme 'atom-one-dark t))
-    (use-package spacemacs-common
-      :ensure spacemacs-theme
-      :config
-        (load-theme 'spacemacs-dark t))
-
-    ;; Show highlighted buffer-id as decoration. (Default: nil)
-    ;; (setq moe-theme-highlight-buffer-id t)
-
-    ;; (moe-dark)
-    ;; (powerline-moe-theme)
-    ;; (sml/apply-theme sml/theme)
-    ;; (set-frame-parameter frame
-    ;;                      'background-mode
-    ;;                      'dark)
-    ;; (enable-theme 'solarized)
-    ;; Remove modeline under and over lines
-    ;; (set-face-attribute
-    ;; 'mode-line nil
-    ;; :underline nil
-    ;; :overline nil)
-    ;; (set-face-attribute
-    ;; 'mode-line-inactive nil
-;; 
-    ;; :underline nil
-    ;; :overline nil)
+(use-package spacemacs-common
+  :ensure spacemacs-theme
+  :config
+  (if (daemonp)
+    (add-hook 'after-make-frame-functions
+      (lambda (frame)
+        (when (eq (length (frame-list)) 2)
+	  (progn
+            (select-frame frame)
+            (load-theme 'spacemacs-dark t)))))
+    (load-theme 'spacemacs-dark 1))
 )
-
-;; (if (daemonp)
-;;     (add-hook 'after-make-frame-functions
-;;               (lambda (frame)
-;;                 (my-load-theme)))
-;;   (my-load-theme))
-;; (add-hook 'after-make-frame-functions
-;;           (lambda (frame)
-;;             (my-load-theme frame)))
-(my-load-theme)
 #+END_SRC
 
 Note that Solarized theme will require 24bit color support in
@@ -560,8 +529,8 @@ to satisfy my needs.
 	"C-k" 'kill-line
 	)
       (general-define-key
-        :states '(insert emacs)
-        "C-e" 'end-of-line)
+	:states '(insert emacs)
+	"C-e" 'end-of-line)
 
       (define-key evil-visual-state-map "\C-k" 'kill-region)
       (define-key evil-normal-state-map "Q" 'call-last-kbd-macro)
@@ -612,7 +581,7 @@ to satisfy my needs.
 
       ;; (evil-declare-key 'normal org-mode-map
       (general-nmap 
-        :keymaps 'org-mode-map
+	:keymaps 'org-mode-map
 	:prefix "z"
 	  "a" 'org-cycle
 	  "A" 'org-shifttab
@@ -633,10 +602,10 @@ to satisfy my needs.
 	  "M-L" 'org-metaright)
 
       ;; ECB compatibility settings
-      (add-hook 'ecb-history-buffer-after-create-hook 'evil-motion-state)
-      (add-hook 'ecb-directories-buffer-after-create-hook 'evil-motion-state)
-      (add-hook 'ecb-methods-buffer-after-create-hook 'evil-motion-state)
-      (add-hook 'ecb-sources-buffer-after-create-hook 'evil-motion-state)
+      ;; (add-hook 'ecb-history-buffer-after-create-hook 'evil-motion-state)
+      ;; (add-hook 'ecb-directories-buffer-after-create-hook 'evil-motion-state)
+      ;; (add-hook 'ecb-methods-buffer-after-create-hook 'evil-motion-state)
+      ;; (add-hook 'ecb-sources-buffer-after-create-hook 'evil-motion-state)
 
       ;; Start specific modes in specific evil modes
       (loop for (mode . state) in '((inferior-emacs-lisp-mode . emacs)
@@ -658,6 +627,28 @@ to satisfy my needs.
 				    (compilation-mode . emacs)
 				    (wdired-mode . normal))
 	    do (evil-set-initial-state mode state))
+
+	;; Exit emacs
+	(general-nvmap
+	  :prefix "SPC q"
+	    "q" 'kill-emacs
+	    "s" 'save-buffers-kill-emacs
+	    )
+
+	;; Evil avy jump
+	(defun pop-local-mark-ring ()
+	  "Move cursor to last mark position of current buffer.
+	  Call this repeatedly will cycle all positions in `mark-ring'.
+	  URL `http://ergoemacs.org/emacs/emacs_jump_to_previous_position.html'
+	  Version 2016-04-04"
+	  (interactive)
+	  (set-mark-command t))
+	(general-nvmap
+	  :prefix "SPC j"
+	    "b" 'pop-global-mark
+	    "j" 'evil-avy-goto-char
+	    "w" 'evil-avy-goto-word-1
+	    "l" 'evil-avy-goto-line)
       ))
   ;; (evilnc-default-hotkeys)
 
@@ -667,9 +658,12 @@ to satisfy my needs.
 
 Just like helm or ido, ivy is a “generic completion framework”. It
 shines at being unobtrusive and really fast. Counsel is its derivative
-that works like helm.
+that works like helm. 
 
 #+BEGIN_SRC emacs-lisp
+;; smex provides counsel a way to sort candidates
+(use-package smex :ensure t)
+
 (use-package ivy :ensure t
   :diminish (ivy-mode . "") ; does not display ivy in the modeline
   :init (ivy-mode 1)        ; enable ivy globally at startup
@@ -837,10 +831,12 @@ setting with integration with counsel.
     :config
       (progn
 	(use-package counsel-projectile :ensure t)
+	(use-package ag :ensure t)
 	(general-define-key
 	  :states '(normal visual insert)
 	  :prefix "C-c p"
-	  "a" 'counsel-projectile-ag
+	  "a" 'projectile-find-other-file
+	  "s" 'projectile-ag
 	  "f" 'counsel-projectile-find-file
 	  "p" 'counsel-projectile-switch-project
 	  "g" 'counsel-projectile-find-file-dwim
@@ -1091,6 +1087,15 @@ Now initialize =ycmd= to do autocompletion
 )))
 #+END_SRC
 
+Finally we need =cmake-mode= to handle =CMakelists.txt= files
+#+BEGIN_SRC emacs-lisp
+;; cmake mode
+(use-package cmake-mode :ensure t
+:commands cmake-mode
+:mode (("CMakelists\\.txt\\'" . cmake-mode)
+       ("\\.cmake\\'" . cmake-mode)))
+#+END_SRC
+
 * Org Mode
 This is the customization for =org-mode=.
 #+BEGIN_SRC emacs-lisp
@@ -1193,6 +1198,126 @@ This is the customization for =org-mode=.
 ))
 #+END_SRC
 
+* mu4e Email system
+mu4e is an excellent email system
+#+BEGIN_SRC emacs-lisp
+(use-package mu4e
+:init
+  (setq mu4e-maildir "/home/alex/mail")
+  (setq mu4e-get-mail-command "offlineimap"
+        mu4e-update-interval 300)
+  (setq
+   mu4e-index-cleanup nil      ;; don't do a full cleanup check
+   mu4e-index-lazy-check t)    ;; don't consider up-to-date dirs
+  (setq my-mu4e-account-alist
+    '(("Gmail"
+       (mu4e-sent-folder "/Gmail/Sent_Mail")
+       (mu4e-drafts-folder "/Gmail/Drafts")
+       (user-mail-address "fizban007@gmail.com")
+       (smtpmail-default-smtp-server "smtp.gmail.com")
+       (smtpmail-local-domain "gmail.com")
+       (smtpmail-smtp-user "fizban007")
+       (smtpmail-smtp-server "smtp.gmail.com")
+       (smtpmail-stream-type starttls)
+       (smtpmail-smtp-service 587))
+      ("Columbia"
+       (mu4e-sent-folder "/Columbia/Sent_Mail")
+       (mu4e-drafts-folder "/Columbia/Drafts")
+       (user-mail-address "yuran.chen@columbia.edu")
+       (smtpmail-default-smtp-server "smtp.gmail.com")
+       (smtpmail-local-domain "columbia.edu")
+       (smtpmail-smtp-user "yc2627@columbia.edu")
+       (smtpmail-smtp-server "smtp.gmail.com")
+       (smtpmail-stream-type starttls)
+       (smtpmail-smtp-service 587))
+      ("Princeton"
+       (mu4e-sent-folder "/Princeton/Sent_Mail")
+       (mu4e-drafts-folder "/Princeton/Drafts")
+       (user-mail-address "yuran.chen@princeton.edu")
+       (smtpmail-default-smtp-server "smtp.princeton.edu")
+       (smtpmail-local-domain "princeton.edu")
+       (smtpmail-smtp-user "yuranc")
+       (smtpmail-smtp-server "smtp.princeton.edu")
+       (smtpmail-stream-type starttls)
+       (smtpmail-smtp-service 587))
+      ("Astro"
+       (mu4e-sent-folder "/Astro/Sent_Mail")
+       (mu4e-drafts-folder "/Astro/Drafts")
+       (user-mail-address "alexc@astro.princeton.edu")
+       (smtpmail-default-smtp-server "mail.astro.princeton.edu")
+       (smtpmail-local-domain "astro.princeton.edu")
+       (smtpmail-smtp-user "alexc")
+       (smtpmail-smtp-server "mail.astro.princeton.edu")
+       (smtpmail-stream-type starttls)
+       (smtpmail-smtp-service 587))
+      ("DPSE"
+       (mu4e-sent-folder "/dpse/Sent")
+       (mu4e-drafts-folder "/dpse/Draft")
+       (user-mail-address "alex.c@deepsensing.cn")
+       (smtpmail-default-smtp-server "smtp.mxhichina.com")
+       (smtpmail-local-domain "deepsensing.cn")
+       (smtpmail-smtp-user "alex.c@deepsensing.cn")
+       (smtpmail-smtp-server "smtp.mxhichina.com")
+       (smtpmail-stream-type ssl)
+       (smtpmail-smtp-service 465))))
+  (defun my-mu4e-set-account ()
+    "Set the account for composing a message."
+    (let* ((account
+            (if mu4e-compose-parent-message
+                (let ((maildir (mu4e-message-field mu4e-compose-parent-message :maildir)))
+                  (string-match "/\\(.*?\\)/" maildir)
+                  (match-string 1 maildir))
+              (completing-read (format "Compose with account: (%s) "
+                                       (mapconcat #'(lambda (var) (car var))
+                                                  my-mu4e-account-alist "/"))
+                               (mapcar #'(lambda (var) (car var)) my-mu4e-account-alist)
+                               nil t nil nil (caar my-mu4e-account-alist))))
+           (account-vars (cdr (assoc account my-mu4e-account-alist))))
+      (if account-vars
+          (mapc #'(lambda (var)
+                    (set (car var) (cadr var)))
+                account-vars)
+        (error "No email account found"))))
+  (add-hook 'mu4e-compose-pre-hook 'my-mu4e-set-account)
+
+  (setq mu4e-maildir-shortcuts
+        '( ("/Gmail/Primary"       . ?g)
+           ("/Gmail/Updates"       . ?u)
+           ("/Columbia/INBOX"      . ?c)
+           ("/Princeton/INBOX"     . ?p)
+           ("/Astro/INBOX"         . ?a)))
+)
+
+(use-package mu4e-maildirs-extension :ensure t
+:init
+  (mu4e-maildirs-extension)
+  (setq mu4e-maildirs-extension-insert-before-str "\n  Basics")
+  (setq mu4e-maildirs-extension-hide-empty-maildirs t))
+#+END_SRC
+
+* Other Misc Modes
+#+BEGIN_SRC emacs-lisp
+(use-package wgrep-ag :ensure t
+:init
+  (autoload 'wgrep-ag-setup "wgrep-ag")
+  (add-hook 'ag-mode-hook 'wgrep-ag-setup)
+)
+#+END_SRC
+
+The markdown-mode package is exellent. We have a custom setting simply
+because we want to use gfm-mode on README.md files
+#+BEGIN_SRC emacs-lisp
+(use-package markdown-mode :ensure t
+:commands (markdown-mode gfm-mode)
+:mode (("README\\.md\\'" . gfm-mode)
+	("\\.md\\'" . markdown-mode)
+	("\\.markdown\\'" . markdown-mode))
+:init
+  (add-hook 'gfm-mode-hook
+            (lambda ()
+              (setq markdown-command "marked"))))
+#+END_SRC
+
 * Window Manipulation
 Here we define some convenient keys for window manipulation, mostly inspired by spacemacs
 #+BEGIN_SRC emacs-lisp
@@ -1217,7 +1342,6 @@ Use =ace-window= for fast jump to specific window
   (setq aw-dispatch-always t)
 )
 #+END_SRC
-
 
 * Custom File
 Emacs has a built-in customization interface. All the customizations
@@ -1255,6 +1379,4 @@ the =session.el= to support cross-session history.
   (setq recentf-max-menu-items 25)
 #+END_SRC
 
-* Unfinished
-*** TODO Various language modes
     
