@@ -353,6 +353,7 @@ and profit.
   :init
   (progn
     (require 'spaceline-config)
+    (setq powerline-default-separator 'wave)
     (spaceline-emacs-theme)))
 #+END_SRC
 
@@ -536,9 +537,9 @@ to satisfy my needs.
       (define-key evil-normal-state-map "Q" 'call-last-kbd-macro)
       (define-key evil-visual-state-map "Q" 'call-last-kbd-macro)
       ;; (define-key evil-normal-state-map (kbd "TAB") 'evil-undefine)
-      (define-key evil-normal-state-map "\M-." 'evil-undefine)
-      (define-key evil-normal-state-map "\C-t" 'evil-undefine)
-      (define-key evil-insert-state-map "\C-t" 'evil-undefine)
+      ;; (define-key evil-normal-state-map "\M-." 'evil-undefine)
+      ;; (define-key evil-normal-state-map "\C-t" 'evil-undefine)
+      ;; (define-key evil-insert-state-map "\C-t" 'evil-undefine)
       (define-key evil-normal-state-map "\C-v" 'evil-scroll-down)
       (define-key evil-visual-state-map "\C-v" 'evil-scroll-down)
       (define-key evil-normal-state-map "\M-v" 'evil-scroll-up)
@@ -1195,6 +1196,13 @@ This is the customization for =org-mode=.
           (setq org-pandoc-options-for-latex-pdf '((latex-engine . "xelatex")))
           ))
 
+      ;; Misc settings
+      (add-to-list 'auto-mode-alist '("\\.\\(org\\|org_archive\\)$" . org-mode))
+      (global-set-key "\C-cl" 'org-store-link)
+      (global-set-key "\C-cc" 'org-capture)
+      (global-set-key "\C-ca" 'org-agenda)
+      (global-set-key "\C-cb" 'org-iswitchb)
+
 ))
 #+END_SRC
 
@@ -1321,14 +1329,66 @@ because we want to use gfm-mode on README.md files
 * Window Manipulation
 Here we define some convenient keys for window manipulation, mostly inspired by spacemacs
 #+BEGIN_SRC emacs-lisp
-(general-define-key
-  :states '(normal visual)
+;; From Spacemacs:
+(defun spacemacs/window-layout-toggle ()
+  "Toggle between horizontal and vertical layout of two windows"
+  (interactive)
+  (if (= (count-windows) 2)
+    (let* ((window-tree (car (window-tree)))
+           (current-split-vertical-p (car window-tree))
+           (first-window (nth 2 window-tree))
+           (second-window (nth 3 window-tree))
+           (second-window-state (window-state-get second-window))
+           (splitter (if current-split-vertical-p
+                         #'split-window-horizontally
+                       #'split-window-vertically)))
+      (delete-other-windows first-window)
+      ;; `window-state-put' also re-selects the window if needed, so we don't
+      ;; need to call `select-window'
+      (window-state-put second-window-state (funcall splitter)))
+    (error "Can't toggle window layout when the number of windows isn't two.")))
+
+(defun spacemacs/alternate-buffer (&optional window)
+  "Switch back and forth between current and last buffer in the
+current window."
+  (interactive)
+  (let ((current-buffer (window-buffer window))
+        (buffer-predicate
+         (frame-parameter (window-frame window) 'buffer-predicate)))
+    ;; switch to first buffer previously shown in this window that matches
+    ;; frame-parameter `buffer-predicate'
+    (switch-to-buffer
+     (or (cl-find-if (lambda (buffer)
+                       (and (not (eq buffer current-buffer))
+                            (or (null buffer-predicate)
+                                (funcall buffer-predicate buffer))))
+                     (mapcar #'car (window-prev-buffers window)))
+         ;; `other-buffer' honors `buffer-predicate' so no need to filter
+         (other-buffer current-buffer t)))))
+
+(defun spacemacs/alternate-window ()
+  "Switch back and forth between current and last window in the
+current frame."
+  (interactive)
+  (let (;; switch to first window previously shown in this frame
+        (prev-window (get-mru-window nil t t)))
+    ;; Check window was not found successfully
+    (unless prev-window (user-error "Last window not found."))
+    (select-window prev-window)))
+
+(general-nvmap
   :prefix "SPC w"
+    "TAB" '(spacemacs/alternate-window :which-key "alternate-window")
+    "+" '(spacemacs/window-layout-toggle :which-key "window-layout-toggle")
     "/" 'split-window-right
     "-" 'split-window-below
     "d" 'delete-window
     "1" 'delete-other-windows
 )
+
+(general-nvmap
+  :prefix "SPC"
+    "TAB" 'spacemacs/alternate-buffer)
 #+END_SRC
 
 Use =ace-window= for fast jump to specific window
