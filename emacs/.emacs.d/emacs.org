@@ -531,7 +531,8 @@ to satisfy my needs.
 	)
       (general-define-key
 	:states '(insert emacs)
-	"C-e" 'end-of-line)
+	"C-e" 'end-of-line
+	"C-d" 'delete-forward-char)
 
       (define-key evil-visual-state-map "\C-k" 'kill-region)
       (define-key evil-normal-state-map "Q" 'call-last-kbd-macro)
@@ -1388,7 +1389,7 @@ current frame."
 
 (general-nvmap
   :prefix "SPC"
-    "TAB" 'spacemacs/alternate-buffer)
+    "TAB" '(spacemacs/alternate-buffer :which-key "alternate-buffer"))
 #+END_SRC
 
 Use =ace-window= for fast jump to specific window
