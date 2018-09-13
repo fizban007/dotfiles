@@ -37,7 +37,7 @@
  '(company-lighter-base "C")
  '(custom-safe-themes
    (quote
-    ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "6a37be365d1d95fad2f4d185e51928c789ef7a4ccf17e7ca13ad63a8bf5b922f" default)))
+    ("a24c5b3c12d147da6cef80938dca1223b7c7f70f2f382b26308eba014dc4833a" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "6a37be365d1d95fad2f4d185e51928c789ef7a4ccf17e7ca13ad63a8bf5b922f" default)))
  '(doxymacs-doxygen-style "C++")
  '(eclim-executable "/opt/cuda/libnsight/plugins/org.eclim_1.7.19/bin/eclim")
  '(eclimd-default-workspace "~/Programs")
@@ -50,7 +50,7 @@
  '(org-export-backends (quote (ascii html icalendar latex md)))
  '(package-selected-packages
    (quote
-    (cmake-mode smex markdown-mode wgrep-ag ag ace-window pdf-tools htmlize ox-pandoc company-ycmd ycmd cuda-mode cdlatex auctex smartparens smartparens-mode counsel-projectile projectile ghub magit company-c-headers company yasnippet spacemacs-theme atom-one-dark atom-one-dark-theme moe-theme session use-package paradox evil-surround evil-nerd-commenter)))
+    (neotree ivy-rich all-the-icons-ivy spaceline-all-the-icons delight all-the-icons rainbow-delimiters material-theme flycheck-ycmd flycheck elpy cmake-mode smex markdown-mode wgrep-ag ag ace-window pdf-tools htmlize ox-pandoc company-ycmd ycmd cuda-mode cdlatex auctex smartparens smartparens-mode counsel-projectile projectile ghub magit company-c-headers company yasnippet spacemacs-theme atom-one-dark atom-one-dark-theme moe-theme session use-package paradox evil-surround evil-nerd-commenter)))
  '(projectile-mode-line (quote (:eval (format " P[%s]" (projectile-project-name)))))
  '(projectile-other-file-alist
    (quote
