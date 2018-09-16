@@ -355,10 +355,6 @@ and profit.
       (require 'spaceline-config)
       (spaceline-spacemacs-theme)
       (setq spaceline-minor-modes-separator "")))
-  ;; (use-package spaceline-all-the-icons 
-  ;;   :ensure t
-  ;;   :after spaceline
-  ;;   :config (spaceline-all-the-icons-theme))
 #+END_SRC
 
 While we are at it, also include =diminish= which is a way to simplify
@@ -493,7 +489,7 @@ mostly deal with visuals.
 #+END_SRC
 
 * Evil mode with General and which-key
-The =evil-mode= in Emacs is a package that simulates Vim behavior. It
+  The =evil-mode= in Emacs is a package that simulates Vim behavior. It
 is the best of its kind in that it almost fully simulates all of Vim's
 behavior by adding a modal layer on top of Emacs's editing
 facilities. It is purely because of this package that I successfully
@@ -630,26 +626,6 @@ to satisfy my needs.
 	  )))
 
       ;; (evil-declare-key 'normal org-mode-map
-      (general-nmap 
-	:keymaps 'org-mode-map
-	:prefix "z"
-	  "a" 'org-cycle
-	  "A" 'org-shifttab
-	  "c" 'hide-subtree
-	  "C" 'org-hide-block-all
-	  "m" 'hide-body
-	  "o" 'show-subtree
-	  "O" 'show-all
-	  "r" 'show-all)
-      (general-define-key
-	:states '(normal visual insert emacs)
-	:keymaps 'org-mode-map
-	  "M-j" 'org-shiftleft
-	  "M-l" 'org-shiftright
-	  "M-J" 'org-metaleft
-	  "M-K" 'org-metadown
-	  "M-H" 'org-metaup
-	  "M-L" 'org-metaright)
 
       ;; ECB compatibility settings
       ;; (add-hook 'ecb-history-buffer-after-create-hook 'evil-motion-state)
@@ -670,6 +646,7 @@ to satisfy my needs.
 				    (help-mode . emacs)
 				    (helm-grep-mode . emacs)
 				    (grep-mode . emacs)
+				    (wgrep-mode . emacs)
 				    (bc-menu-mode . emacs)
 				    (magit-branch-manager-mode . emacs)
 				    (rdictcc-buffer-mode . emacs)
@@ -678,27 +655,6 @@ to satisfy my needs.
 				    (wdired-mode . normal))
 	    do (evil-set-initial-state mode state))
 
-	;; Exit emacs
-	(general-nvmap
-	  :prefix "SPC q"
-	    "q" 'kill-emacs
-	    "s" 'save-buffers-kill-emacs
-	    )
-
-	;; Evil avy jump
-	(defun pop-local-mark-ring ()
-	  "Move cursor to last mark position of current buffer.
-	  Call this repeatedly will cycle all positions in `mark-ring'.
-	  URL `http://ergoemacs.org/emacs/emacs_jump_to_previous_position.html'
-	  Version 2016-04-04"
-	  (interactive)
-	  (set-mark-command t))
-	(general-nvmap
-	  :prefix "SPC j"
-	    "b" 'pop-global-mark
-	    "j" 'evil-avy-goto-char
-	    "w" 'evil-avy-goto-word-1
-	    "l" 'evil-avy-goto-line)
       ))
   ;; (evilnc-default-hotkeys)
 
@@ -716,7 +672,6 @@ that works like helm.
 
   (use-package ivy :ensure t
     :diminish (ivy-mode . "") ; does not display ivy in the modeline
-    ;; :delight ivy-mode
     :init (ivy-mode 1)        ; enable ivy globally at startup
     :bind (:map ivy-mode-map  ; bind in the ivy buffer
 	   ("C-'" . ivy-avy)) ; C-' to ivy-avy
@@ -731,6 +686,7 @@ that works like helm.
     :ensure t
     :after ivy
     :init
+    ;; Display icons for buffer switch C-x b
     (defun ivy-rich-switch-buffer-icon (candidate)
       (with-current-buffer
    	(get-buffer candidate)
@@ -753,19 +709,6 @@ that works like helm.
     (ivy-rich-mode)
 )
   
-  ;; (use-package all-the-icons-ivy
-    ;; :ensure t
-    ;; :config
-    ;; (all-the-icons-ivy-setup))
-
-  ;;   :custom
-  ;;   (ivy-virtual-abbreviate 'full
-  ;; 			  ivy-rich-switch-buffer-align-virtual-buffer t
-  ;; 			  ivy-rich-path-style 'abbrev)
-  ;;   :config
-  ;;   (ivy-set-display-transformer 'ivy-switch-buffer
-  ;; 			       'ivy-rich-switch-buffer-transformer))
-
   (use-package counsel :ensure t
     :bind*                           ; load counsel when pressed
     (("M-x"     . counsel-M-x)       ; M-x use counsel
@@ -836,7 +779,6 @@ is the config:
   (use-package company
     :ensure t
     :diminish "Ⓒ"
-    ;; :delight (company-mode (all-the-icons-material "copyright" :height 0.2))
     :init
       (add-hook 'after-init-hook 'global-company-mode)
     :config
@@ -1107,7 +1049,8 @@ Simply turns on smart parens mode globally.
 
   ;; In C++ mode, automatically insert a new line when pressing return
   ;; in between a pair of curly braces
-  (sp-local-pair 'c++-mode "{" nil :post-handlers '((my-create-newline-and-enter-sexp "RET")))
+  (sp-local-pair '(c-mode c++-mode cuda-mode) "{" nil :post-handlers 
+    '((my-create-newline-and-enter-sexp "RET")))
 
   (defun my-create-newline-and-enter-sexp (&rest _ignored)
     "Open a new brace or bracket expression, with relevant newlines and indent. "
@@ -1203,6 +1146,7 @@ Now initialize =ycmd= to do autocompletion
   (progn
     (set-variable 'ycmd-server-command '("python" "/usr/share/ycmd/ycmd"))
     (set-variable 'ycmd-global-config "~/.ycm_extra_conf.py")
+    (set-variable 'ycmd-extra-conf-whitelist '("~/Projects/*"))
     (use-package company-ycmd :ensure t
       :init
       (company-ycmd-setup))
@@ -1272,7 +1216,7 @@ This is the customization for =org-mode=.
 
     ;; Use cdlatex in org mode
     (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
-    (diminish 'org-cdlatex-mode "ⓛ")
+    (add-hook 'org-cdlatex-mode-hook (lambda () (diminish 'org-cdlatex-mode "ⓛ")))
 
     ;; Add markdown export
     ;; (add-to-list 'org-export-backends 'md)
@@ -1340,6 +1284,26 @@ This is the customization for =org-mode=.
       (global-set-key "\C-ca" 'org-agenda)
       (global-set-key "\C-cb" 'org-iswitchb)
 
+      (general-nmap 
+	:keymaps 'org-mode-map
+	:prefix "z"
+	  "a" 'org-cycle
+	  "A" 'org-shifttab
+	  "c" 'hide-subtree
+	  "C" 'org-hide-block-all
+	  "m" 'hide-body
+	  "o" 'show-subtree
+	  "O" 'show-all
+	  "r" 'show-all)
+      (general-define-key
+	:states '(normal visual insert emacs)
+	:keymaps 'org-mode-map
+	  "M-j" 'org-shiftleft
+	  "M-l" 'org-shiftright
+	  "M-J" 'org-metaleft
+	  "M-K" 'org-metadown
+	  "M-H" 'org-metaup
+	  "M-L" 'org-metaright)
 ))
 #+END_SRC
 
@@ -1463,6 +1427,33 @@ A Emacs tree plugin like NerdTree for Vim. Official repo is at https://github.co
       "A" 'neotree-stretch-toggle
       "H" 'neotree-hidden-file-toggle)
     )
+#+END_SRC
+
+* Other Keybindings
+#+BEGIN_SRC emacs-lisp
+;; Exit emacs
+(general-nvmap
+    :prefix "SPC q"
+    "q" 'kill-emacs
+    "s" 'save-buffers-kill-emacs
+    )
+
+;; Evil avy jump
+(defun pop-local-mark-ring ()
+    "Move cursor to last mark position of current buffer.
+    Call this repeatedly will cycle all positions in `mark-ring'.
+    URL `http://ergoemacs.org/emacs/emacs_jump_to_previous_position.html'
+    Version 2016-04-04"
+    (interactive)
+    (set-mark-command t))
+(general-nvmap
+    :prefix "SPC j"
+    "b" 'pop-global-mark
+    "j" 'evil-avy-goto-char
+    "w" 'evil-avy-goto-word-1
+    "l" 'evil-avy-goto-line)
+
+(general-define-key "C-x C-j" 'dired-jump)
 #+END_SRC
 
 * Other Misc Modes
