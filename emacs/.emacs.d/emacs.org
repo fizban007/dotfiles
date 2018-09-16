@@ -393,22 +393,6 @@ of them here, but one can choose from them at any time.
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle no
-;; Load dracula-theme
-(use-package dracula-theme
-  :ensure t
-  :config
-  (if (daemonp)
-    (add-hook 'after-make-frame-functions
-      (lambda (frame)
-        (when (eq (length (frame-list)) 2)
-	  (progn
-            (select-frame frame)
-            (load-theme 'dracula t)))))
-    (load-theme 'dracula 1))
-)
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle no
 ;; Load atom-one-dark-theme
 (use-package atom-one-dark-theme
   :ensure t
@@ -425,6 +409,22 @@ of them here, but one can choose from them at any time.
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
+;; Load doom-one-theme
+(use-package doom-themes
+  :ensure t
+  :config
+  (if (daemonp)
+    (add-hook 'after-make-frame-functions
+      (lambda (frame)
+        (when (eq (length (frame-list)) 2)
+	  (progn
+            (select-frame frame)
+            (load-theme 'doom-one t)))))
+    (load-theme 'doom-one 1))
+)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle no
 ;; Load spacemacs-theme
 (use-package spacemacs-common
   :ensure spacemacs-theme
@@ -595,9 +595,13 @@ to satisfy my needs.
       (define-key evil-visual-state-map (kbd "DEL") 'evil-scroll-up)
       (define-key evil-normal-state-map "zO" 'evil-open-folds)
 
-      ;; <<<tabbar-evil>>> Tabbar bindings in evil-mode
-      (define-key evil-normal-state-map "gt" 'tabbar-forward-tab)
-      (define-key evil-normal-state-map "gr" 'tabbar-backward-tab)
+      ;; Gonna define folding keys, so enabling hs-minor-mode for all
+      ;; programming modes
+      ;; (add-hook 'prog-mode-hook #'hs-minor-mode)
+
+      ;; Redefine close all folds to close all levels
+      (define-key evil-normal-state-map (kbd "z m") 'hs-hide-level)
+      (define-key evil-visual-state-map (kbd "z m") 'hs-hide-level)
 
       ;; <<<ace-jump-evil>>> Ace-jump bindings in evil-mode
       ;; (define-key evil-normal-state-map " " 'ace-jump-char-mode)
@@ -788,15 +792,16 @@ mistakes in the process.
   (use-package yasnippet 
     :ensure t
     :diminish "ⓨ"
-    ;; :delight (yas-minor-mode (all-the-icons-faicon "yahoo" :height 0.2))
     :init
       (progn
+        ;; Load the snippets
+	(use-package yasnippet-snippets :ensure t)
 	(defun yas-advise-indent-function (function-symbol)
 	  (eval `(defadvice ,function-symbol (around yas/try-expand-first activate)
 		   ,(format
 		     "Try to expand a snippet before point, then call `%s' as usual"
 		     function-symbol)
-		   (let ((yas/fallback-behavior nil))
+		   (let ((yas-fallback-behavior nil))
 		     (unless (and (interactive-p)
 				  (yas-expand))
 		       ad-do-it)))))
@@ -816,11 +821,6 @@ mistakes in the process.
 	(add-hook 'python-mode-hook 'yas-my-initialize)
 	(add-hook 'haskell-mode-hook 'yas-my-initialize)
     ))
-      ;;  (add-to-list 'ac-sources 'ac-source-yasnippet))
-      ;; (progn
-      ;;   ;; (yas-global-mode nil)
-      ;;   ;; (yas/minor-mode-on)
-      ;;   )
 #+END_SRC
 
 Company is an auto-complete framework for Emacs. There are two
@@ -854,7 +854,7 @@ is the config:
 		    (if (looking-at "->\ ") t nil)))))))
 
 	(defun do-yas-expand ()
-	  (let ((yas/fallback-behavior 'return-nil))
+	  (let ((yas-fallback-behavior 'return-nil))
 	    (yas/expand)))
 
 	(defun tab-indent-or-complete ()
@@ -923,8 +923,8 @@ setting with integration with counsel.
 	(use-package counsel-projectile :ensure t)
 	(use-package ag :ensure t)
 	(general-define-key
-	  :states '(normal visual insert)
-	  :prefix "C-c p"
+	  :states '(normal visual)
+	  :prefix "SPC p"
 	  "a" 'projectile-find-other-file
 	  "s" 'projectile-ag
 	  "f" 'counsel-projectile-find-file
@@ -1143,13 +1143,14 @@ Then we load =google-c-style=, =ggtags-mode=, and =cmake-ide=
 when entering C or C++ mode.
 #+BEGIN_SRC emacs-lisp
 (use-package google-c-style :ensure t)
-(use-package cmake-ide :ensure t)
+;; (use-package cmake-ide :ensure t)
 (use-package ggtags :ensure t :diminish nil)
 (add-hook 'c-mode-common-hook 
   (lambda () (progn
     (google-set-c-style)
     (ggtags-mode 1)
-    (cmake-ide-setup)
+    (hs-minor-mode)
+    ;; (cmake-ide-setup)
     (setq ggtags-enable-navigation-keys nil)
     (setq company-backends (remove 'company-semantic company-backends))
     (setq company-backends (remove 'company-clang company-backends))
@@ -1174,6 +1175,19 @@ Try out the package =highlight-doxygen= to see if it works well
   (highlight-doxygen-global-mode 1))
 #+END_SRC
 
+The builtin syntax highlighting doesn’t do a very good job when it
+comes to modern C++. Luckily there’s a remedy:
+=modern-cpp-font-lock=. Configure using:
+#+BEGIN_SRC emacs-lisp
+(use-package modern-cpp-font-lock :ensure t
+  :diminish (modern-cpp-font-lock-mode . "")
+  :init
+  (add-hook 'c++-mode-hook (lambda () (modern-c++-font-lock-global-mode t)))
+  (add-hook 'cuda-mode-hook (lambda () (modern-c++-font-lock-global-mode t)))
+  )
+#+END_SRC
+
+
 Now initialize =ycmd= to do autocompletion
 #+BEGIN_SRC emacs-lisp
 (use-package ycmd :ensure t
@@ -1187,7 +1201,8 @@ Now initialize =ycmd= to do autocompletion
     (add-hook 'cuda-mode-hook 'ycmd-mode))
 :config
   (progn
-    (set-variable 'ycmd-server-command '("python2" "/usr/share/vim/vimfiles/third_party/ycmd/ycmd"))
+    (set-variable 'ycmd-server-command '("python" "/usr/share/ycmd/ycmd"))
+    (set-variable 'ycmd-global-config "~/.ycm_extra_conf.py")
     (use-package company-ycmd :ensure t
       :init
       (company-ycmd-setup))
@@ -1257,6 +1272,7 @@ This is the customization for =org-mode=.
 
     ;; Use cdlatex in org mode
     (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+    (diminish 'org-cdlatex-mode "ⓛ")
 
     ;; Add markdown export
     ;; (add-to-list 'org-export-backends 'md)
@@ -1430,10 +1446,11 @@ A Emacs tree plugin like NerdTree for Vim. Official repo is at https://github.co
 (use-package neotree :ensure t
   :init
   (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
-  (setq neo-vc-integration 'face)
+  (setq neo-vc-integration '(face))
   (general-nvmap
     :prefix "SPC f"
-      "t" 'neotree-toggle)
+      "t" 'neotree-toggle
+      "f" 'neotree-find)
   (general-nmap
     :keymaps 'neotree-mode-map
       "TAB" 'neotree-enter

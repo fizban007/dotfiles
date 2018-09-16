@@ -50,7 +50,7 @@
  '(org-export-backends (quote (ascii html icalendar latex md)))
  '(package-selected-packages
    (quote
-    (neotree ivy-rich all-the-icons-ivy spaceline-all-the-icons delight all-the-icons rainbow-delimiters material-theme flycheck-ycmd flycheck elpy cmake-mode smex markdown-mode wgrep-ag ag ace-window pdf-tools htmlize ox-pandoc company-ycmd ycmd cuda-mode cdlatex auctex smartparens smartparens-mode counsel-projectile projectile ghub magit company-c-headers company yasnippet spacemacs-theme atom-one-dark atom-one-dark-theme moe-theme session use-package paradox evil-surround evil-nerd-commenter)))
+    (doom-themes modern-cpp-font-lock yasnippet-snippets neotree ivy-rich all-the-icons-ivy spaceline-all-the-icons delight all-the-icons rainbow-delimiters material-theme flycheck-ycmd flycheck elpy cmake-mode smex markdown-mode wgrep-ag ag ace-window pdf-tools htmlize ox-pandoc company-ycmd ycmd cuda-mode cdlatex auctex smartparens smartparens-mode counsel-projectile projectile ghub magit company-c-headers company yasnippet spacemacs-theme atom-one-dark atom-one-dark-theme moe-theme session use-package paradox evil-surround evil-nerd-commenter)))
  '(projectile-mode-line (quote (:eval (format " P[%s]" (projectile-project-name)))))
  '(projectile-other-file-alist
    (quote
