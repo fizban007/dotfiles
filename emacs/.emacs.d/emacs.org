@@ -335,8 +335,9 @@ monospace font will be used.
 #+END_SRC
 
 ** Line Numbers
-For Emacs 26 and later, =display-line-numbers-mode= is available. This is what
-we use here. For reference see [[https://www.emacswiki.org/emacs/LineNumbers]]
+For Emacs 26 and later, =display-line-numbers-mode= is available. This is
+what we use here. For reference see
+[[https://www.emacswiki.org/emacs/LineNumbers]]
 
 #+BEGIN_SRC emacs-lisp
 (global-display-line-numbers-mode)
@@ -366,6 +367,7 @@ minor modes in the mode line.
   :init
   (eval-after-load "abbrev" '(diminish 'abbrev-mode))
   (eval-after-load "hideshow" '(diminish 'hs-minor-mode))
+  (eval-after-load "eldoc" '(diminish 'eldoc-mode "Ⓔ"))
 )
 #+END_SRC
 
@@ -482,10 +484,17 @@ mostly deal with visuals.
 
   ;; Highlighting TODO, FIXME and BUG in programming modes
   (add-hook 'prog-mode-hook
-            (lambda ()
-              (font-lock-add-keywords nil
-                                      '(("\\<\\(FIXME\\|TODO\\|BUG\\):" 1 font-lock-warning-face t)))
-              ))
+	    (lambda ()
+	      (font-lock-add-keywords nil
+		'(("\\<\\(FIXME\\|TODO\\|BUG\\):" 1 font-lock-warning-face t)))
+	      ))
+
+  ;; Set fill-column to 70 which is the size of column in equal 3 panel
+  (setq-default fill-column 72)
+  (global-visual-line-mode)
+  ;; (use-package visual-fill-column :ensure t
+  ;;   :init
+  ;;   (global-visual-fill-column-mode))
 #+END_SRC
 
 * Evil mode with General and which-key
@@ -679,6 +688,14 @@ that works like helm.
     (setq ivy-use-virtual-buffers t)   ; extend searching to bookmarks and …
     (setq ivy-height 20)               ; set height of the ivy window
     (setq ivy-count-format "(%d/%d) ") ; count format, from the ivy help page
+    (setq ivy-use-selectable-prompt t) ; Make the prompt line selectable
+    (ivy-set-occur 'swiper 'swiper-occur)
+    (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur)
+
+    (use-package flx :ensure t
+      :init
+      (setq ivy-re-builders-alist
+        '((t . ivy--regex-fuzzy))))
     )
 
   ;; ivy-rich is a package that makes ivy buffers display more information
@@ -719,7 +736,16 @@ that works like helm.
      ("C-c /"   . counsel-ag)        ; search for regexp in git repo using ag
      ("C-c l"   . counsel-locate)   ; search for files or else using locate
      ("C-s"     . counsel-grep-or-swiper) ; search for something in the buffer
-    ))
+    )
+    :init
+    (general-nvmap
+      :prefix "SPC x"
+        "f" 'counsel-find-file
+	"s" 'save-buffer
+	"c" 'save-buffers-kill-terminal
+	"r" 'counsel-recentf
+	"b" 'ivy-switch-buffer
+	"F2" 'counsel-linux-app))
 #+END_SRC
 
 * Yasnippet and Company
@@ -734,7 +760,7 @@ mistakes in the process.
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet 
     :ensure t
-    :diminish "ⓨ"
+    :diminish (yas-minor-mode . "ⓨ")
     :init
       (progn
         ;; Load the snippets
@@ -868,7 +894,7 @@ setting with integration with counsel.
 	  :states '(normal visual)
 	  :prefix "SPC p"
 	  "a" 'projectile-find-other-file
-	  "s" 'projectile-ag
+	  "s" 'counsel-projectile-ag
 	  "f" 'counsel-projectile-find-file
 	  "p" 'counsel-projectile-switch-project
 	  "g" 'counsel-projectile-find-file-dwim
@@ -890,22 +916,18 @@ together here to provide the superior Emacs LaTeX editing
 experience. First is the big dependency which is AUCTeX:
 
 #+BEGIN_SRC emacs-lisp
-(use-package auctex
-  :ensure t
-  ;; use LaTeX mode for .tex files
-  :mode ("\\.tex\\'" . LaTeX-mode)
-  ;; Delay the configuratio until LaTeX mode is loaded
-  :config
-  (progn
-    ;; These are my customary settings
-    (defun my-initialize-latex ()
-
+(use-package auctex :ensure t ;; use LaTeX mode for .tex files 
+  :mode
+    ("\\.tex\\'" . LaTeX-mode) ;; Delay the configuratio until LaTeX mode is loaded 
+  :config 
+  (progn ;; These are my customary settings 
+  (defun my-initialize-latex ()
     ;; Zotelo is a package which interacts with Zotero through the
-    ;; MozRepl console in firefox. It can directly draw references
+    ;; MozRepl console in firefox. It can directly draw references 
     ;; from your zotero collection.
     (use-package zotelo :ensure t
-      :init
-      (add-hook 'LaTeX-mode-hook 'zotelo-minor-mode))
+    :init
+    (add-hook 'LaTeX-mode-hook 'zotelo-minor-mode))
 
 
     (setq TeX-auto-save t)
@@ -971,8 +993,8 @@ experience. First is the big dependency which is AUCTeX:
 	    (hide-sublevels (+ evil-fold-level 1)))
 
 	(general-nmap 
-          :keymaps 'LaTeX-mode-map
-	  :prefix "z"
+	:keymaps 'LaTeX-mode-map
+	:prefix "z"
 	    "o" #'latex-evil-open-folds-at-point
 	    "O" #'latex-evil-open-fold
 	    "c" #'latex-evil-close-folds-at-point
@@ -1006,12 +1028,12 @@ experience. First is the big dependency which is AUCTeX:
 
     (add-hook 'LaTeX-mode-hook (lambda ()
 				(TeX-fold-mode 1)))
-    (add-hook 'LaTeX-mode-hook 'visual-line-mode)
+    ;; (add-hook 'LaTeX-mode-hook 'visual-line-mode)
     (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
     (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
     (add-hook 'LaTeX-mode-hook 'zotelo-minor-mode)
     (add-hook 'LaTeX-mode-hook 'setup-synctex-latex)
-  ))
+))
 #+END_SRC
 
 Then we install the =cdlatex.el=, which includes quite a few
@@ -1123,7 +1145,7 @@ comes to modern C++. Luckily there’s a remedy:
 =modern-cpp-font-lock=. Configure using:
 #+BEGIN_SRC emacs-lisp
 (use-package modern-cpp-font-lock :ensure t
-  :diminish (modern-cpp-font-lock-mode . "")
+  :diminish (modern-c++-font-lock-mode . "")
   :init
   (add-hook 'c++-mode-hook (lambda () (modern-c++-font-lock-global-mode t)))
   (add-hook 'cuda-mode-hook (lambda () (modern-c++-font-lock-global-mode t)))
@@ -1155,6 +1177,16 @@ Now initialize =ycmd= to do autocompletion
       (flycheck-ycmd-setup))
 ))
 #+END_SRC
+
+Use =clang-format= from system clang
+#+BEGIN_SRC emacs-lisp
+(load "/usr/share/clang/clang-format.el")
+(add-hook 'c-mode-common-hook (lambda ()
+  (general-nmap "SPC c f" 'clang-format-buffer)
+  (general-vmap "SPC c f" 'clang-format-region)
+))
+#+END_SRC
+
 
 Finally we need =cmake-mode= to handle =CMakelists.txt= files
 #+BEGIN_SRC emacs-lisp
@@ -1438,6 +1470,42 @@ A Emacs tree plugin like NerdTree for Vim. Official repo is at https://github.co
     "s" 'save-buffers-kill-emacs
     )
 
+(defun package-upgrade-all ()
+  "Upgrade all packages automatically without showing *Packages* buffer."
+  (interactive)
+  (package-refresh-contents)
+  (let (upgrades)
+    (cl-flet ((get-version (name where)
+                (let ((pkg (cadr (assq name where))))
+                  (when pkg
+                    (package-desc-version pkg)))))
+      (dolist (package (mapcar #'car package-alist))
+        (let ((in-archive (get-version package package-archive-contents)))
+          (when (and in-archive
+                     (version-list-< (get-version package package-alist)
+                                     in-archive))
+            (push (cadr (assq package package-archive-contents))
+                  upgrades)))))
+    (if upgrades
+        (when (yes-or-no-p
+               (message "Upgrade %d package%s (%s)? "
+                        (length upgrades)
+                        (if (= (length upgrades) 1) "" "s")
+                        (mapconcat #'package-desc-full-name upgrades ", ")))
+          (save-window-excursion
+            (dolist (package-desc upgrades)
+              (let ((old-package (cadr (assq (package-desc-name package-desc)
+                                             package-alist))))
+                (package-install package-desc)
+                (package-delete  old-package)))))
+      (message "All packages are up to date"))))
+
+;; Update packages and show package list
+(general-nvmap
+  :prefix "SPC x"
+    "p" 'package-list-packages
+    "u" 'package-upgrade-all)
+
 ;; Evil avy jump
 (defun pop-local-mark-ring ()
     "Move cursor to last mark position of current buffer.
@@ -1535,10 +1603,12 @@ current frame."
   :prefix "SPC w"
     "TAB" '(spacemacs/alternate-window :which-key "alternate-window")
     "+" '(spacemacs/window-layout-toggle :which-key "window-layout-toggle")
+    "=" 'balance-windows
     "/" 'split-window-right
     "-" 'split-window-below
     "d" 'delete-window
     "1" 'delete-other-windows
+    "w" 'ace-window
 )
 
 (general-nvmap
