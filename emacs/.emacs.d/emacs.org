@@ -492,6 +492,7 @@ mostly deal with visuals.
   ;; Set fill-column to 70 which is the size of column in equal 3 panel
   (setq-default fill-column 72)
   (global-visual-line-mode)
+  (diminish 'visual-line-mode "Ⓦ")
   ;; (use-package visual-fill-column :ensure t
   ;;   :init
   ;;   (global-visual-fill-column-mode))
@@ -676,76 +677,76 @@ shines at being unobtrusive and really fast. Counsel is its derivative
 that works like helm. 
 
 #+BEGIN_SRC emacs-lisp
-  ;; smex provides counsel a way to sort candidates
-  (use-package smex :ensure t)
+    ;; smex provides counsel a way to sort candidates
+    (use-package smex :ensure t)
 
-  (use-package ivy :ensure t
-    :diminish (ivy-mode . "") ; does not display ivy in the modeline
-    :init (ivy-mode 1)        ; enable ivy globally at startup
-    :bind (:map ivy-mode-map  ; bind in the ivy buffer
-	   ("C-'" . ivy-avy)) ; C-' to ivy-avy
-    :config
-    (setq ivy-use-virtual-buffers t)   ; extend searching to bookmarks and …
-    (setq ivy-height 20)               ; set height of the ivy window
-    (setq ivy-count-format "(%d/%d) ") ; count format, from the ivy help page
-    (setq ivy-use-selectable-prompt t) ; Make the prompt line selectable
-    (ivy-set-occur 'swiper 'swiper-occur)
-    (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur)
+    (use-package ivy :ensure t
+      :diminish (ivy-mode . "") ; does not display ivy in the modeline
+      :init (ivy-mode 1)        ; enable ivy globally at startup
+      :bind (:map ivy-mode-map  ; bind in the ivy buffer
+	     ("C-'" . ivy-avy)) ; C-' to ivy-avy
+      :config
+      (setq ivy-use-virtual-buffers t)   ; extend searching to bookmarks and …
+      (setq ivy-height 20)               ; set height of the ivy window
+      (setq ivy-count-format "(%d/%d) ") ; count format, from the ivy help page
+      (setq ivy-use-selectable-prompt t) ; Make the prompt line selectable
+      (ivy-set-occur 'swiper 'swiper-occur)
+      (ivy-set-occur 'ivy-switch-buffer 'ivy-switch-buffer-occur)
 
-    (use-package flx :ensure t
+      ;; (use-package flx :ensure t
+      ;;   :init
+      ;;   (setq ivy-re-builders-alist
+      ;;     '((t . ivy--regex-fuzzy))))
+      )
+
+    ;; ivy-rich is a package that makes ivy buffers display more information
+    (use-package ivy-rich
+      :ensure t
+      :after ivy
       :init
-      (setq ivy-re-builders-alist
-        '((t . ivy--regex-fuzzy))))
-    )
-
-  ;; ivy-rich is a package that makes ivy buffers display more information
-  (use-package ivy-rich
-    :ensure t
-    :after ivy
-    :init
-    ;; Display icons for buffer switch C-x b
-    (defun ivy-rich-switch-buffer-icon (candidate)
-      (with-current-buffer
-   	(get-buffer candidate)
-	(let ((icon (all-the-icons-icon-for-mode major-mode)))
-	  (if (symbolp icon)
-	      (all-the-icons-icon-for-mode 'fundamental-mode)
-	    icon))))
-    (setq ivy-rich--display-transformers-list
-      '(ivy-switch-buffer
-        (:columns
-         ((ivy-rich-switch-buffer-icon :width 2)
-          (ivy-rich-candidate (:width 30))
-          (ivy-rich-switch-buffer-size (:width 7))
-          (ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
-          (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
-          (ivy-rich-switch-buffer-project (:width 15 :face success))
-          (ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3))))))
-         :predicate
-         (lambda (cand) (get-buffer cand)))))
-    (ivy-rich-mode)
-)
+      ;; Display icons for buffer switch C-x b
+      (defun ivy-rich-switch-buffer-icon (candidate)
+	(with-current-buffer
+	  (get-buffer candidate)
+	  (let ((icon (all-the-icons-icon-for-mode major-mode)))
+	    (if (symbolp icon)
+		(all-the-icons-icon-for-mode 'fundamental-mode)
+	      icon))))
+      (setq ivy-rich--display-transformers-list
+	'(ivy-switch-buffer
+	  (:columns
+	   ((ivy-rich-switch-buffer-icon :width 2)
+	    (ivy-rich-candidate (:width 30))
+	    (ivy-rich-switch-buffer-size (:width 7))
+	    (ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
+	    (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
+	    (ivy-rich-switch-buffer-project (:width 15 :face success))
+	    (ivy-rich-switch-buffer-path (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3))))))
+	   :predicate
+	   (lambda (cand) (get-buffer cand)))))
+      (ivy-rich-mode)
+  )
   
-  (use-package counsel :ensure t
-    :bind*                           ; load counsel when pressed
-    (("M-x"     . counsel-M-x)       ; M-x use counsel
-     ("C-x C-f" . counsel-find-file) ; C-x C-f use counsel-find-file
-     ("C-x C-r" . counsel-recentf)   ; search recently edited files
-     ("C-c f"   . counsel-git)       ; search for files in git repo
-     ("C-c s"   . counsel-git-grep)  ; search for regexp in git repo
-     ("C-c /"   . counsel-ag)        ; search for regexp in git repo using ag
-     ("C-c l"   . counsel-locate)   ; search for files or else using locate
-     ("C-s"     . counsel-grep-or-swiper) ; search for something in the buffer
-    )
-    :init
-    (general-nvmap
-      :prefix "SPC x"
-        "f" 'counsel-find-file
-	"s" 'save-buffer
-	"c" 'save-buffers-kill-terminal
-	"r" 'counsel-recentf
-	"b" 'ivy-switch-buffer
-	"F2" 'counsel-linux-app))
+    (use-package counsel :ensure t
+      :bind*                           ; load counsel when pressed
+      (("M-x"     . counsel-M-x)       ; M-x use counsel
+       ("C-x C-f" . counsel-find-file) ; C-x C-f use counsel-find-file
+       ("C-x C-r" . counsel-recentf)   ; search recently edited files
+       ("C-c f"   . counsel-git)       ; search for files in git repo
+       ("C-c s"   . counsel-git-grep)  ; search for regexp in git repo
+       ("C-c /"   . counsel-ag)        ; search for regexp in git repo using ag
+       ("C-c l"   . counsel-locate)   ; search for files or else using locate
+       ("C-s"     . counsel-grep-or-swiper) ; search for something in the buffer
+      )
+      :init
+      (general-nvmap
+	:prefix "SPC x"
+	  "f" 'counsel-find-file
+	  "s" 'save-buffer
+	  "c" 'save-buffers-kill-terminal
+	  "r" 'counsel-recentf
+	  "b" 'ivy-switch-buffer
+	  "F2" 'counsel-linux-app))
 #+END_SRC
 
 * Yasnippet and Company
@@ -804,7 +805,7 @@ is the config:
 #+BEGIN_SRC emacs-lisp
   (use-package company
     :ensure t
-    :diminish "Ⓒ"
+    :diminish (company-mode . "Ⓒ")
     :init
       (add-hook 'after-init-hook 'global-company-mode)
     :config
