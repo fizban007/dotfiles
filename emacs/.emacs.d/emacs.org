@@ -1570,6 +1570,26 @@ because we want to use gfm-mode on README.md files
               (setq markdown-command "marked"))))
 #+END_SRC
 
+Lua-mode is mostly for editing awesome window manager configurations
+#+BEGIN_SRC emacs-lisp
+(use-package lua-mode :ensure t
+:commands (lua-mode)
+:mode (("\\.lua\\'" . lua-mode)))
+#+END_SRC
+
+PKGBUILD mode is for editting the archlinux package files
+#+BEGIN_SRC emacs-lisp
+(use-package pkgbuild-mode :ensure t
+:commands (pkgbuild-mode)
+:mode (("PKGBUILD\\'" . pkgbuild-mode)))
+#+END_SRC
+
+Add misc modes:
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'auto-mode-alist '(".offlineimaprc\\'" . conf-mode)) 
+#+END_SRC
+
+
 * Window Manipulation
 Here we define some convenient keys for window manipulation, mostly inspired by spacemacs
 #+BEGIN_SRC emacs-lisp
