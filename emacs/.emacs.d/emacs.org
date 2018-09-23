@@ -1339,6 +1339,26 @@ This is the customization for =org-mode=.
 ))
 #+END_SRC
 
+* Web Mode
+This is for editing html presentations. There are more customization
+options outlined at [[web-mode.org]]
+#+BEGIN_SRC emacs-lisp
+(use-package web-mode :ensure t
+:commands (web-mode)
+:mode (("\\.html?\\'" . web-mode)
+       ("\\.tpl\\.php\\'" . web-mode))
+:config
+  (use-package company-web :ensure t
+    :init
+    (require 'company-web-html)
+    (add-hook 'web-mode-hook (lambda ()
+      (set (make-local-variable 'company-backends) '(company-web-html)))))
+  (setq web-mode-markup-indent-offset 2)
+  (setq web-mode-css-indent-offset 2)
+  (setq web-mode-code-indent-offset 2)
+)
+#+END_SRC
+
 * mu4e Email system
 mu4e is an excellent email system
 #+BEGIN_SRC emacs-lisp
@@ -1427,6 +1447,7 @@ mu4e is an excellent email system
            ("/Columbia/INBOX"      . ?c)
            ("/Princeton/INBOX"     . ?p)
            ("/Astro/INBOX"         . ?a)))
+  (setq browse-url-browser-function 'browse-url-firefox)
 )
 
 (use-package mu4e-maildirs-extension :ensure t
