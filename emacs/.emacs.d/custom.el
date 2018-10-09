@@ -50,7 +50,7 @@
  '(org-export-backends (quote (ascii html icalendar latex md)))
  '(package-selected-packages
    (quote
-    (auctex-latexmk pkgbuild-mode lua-mode company-web company-web-html web-mode visual-fill-column-mode visual-fill-column flx doom-themes modern-cpp-font-lock yasnippet-snippets neotree ivy-rich all-the-icons-ivy spaceline-all-the-icons delight all-the-icons rainbow-delimiters material-theme flycheck-ycmd flycheck elpy cmake-mode smex markdown-mode wgrep-ag ag ace-window pdf-tools htmlize ox-pandoc company-ycmd ycmd cuda-mode cdlatex auctex smartparens smartparens-mode counsel-projectile projectile ghub magit company-c-headers company yasnippet spacemacs-theme atom-one-dark atom-one-dark-theme moe-theme session use-package paradox evil-surround evil-nerd-commenter)))
+    (auctex-latexmk magit-popup ivy counsel avy pkgbuild-mode lua-mode company-web company-web-html web-mode visual-fill-column-mode visual-fill-column flx doom-themes modern-cpp-font-lock yasnippet-snippets neotree ivy-rich all-the-icons-ivy spaceline-all-the-icons delight all-the-icons rainbow-delimiters material-theme flycheck-ycmd flycheck elpy cmake-mode smex markdown-mode wgrep-ag ag ace-window pdf-tools htmlize ox-pandoc company-ycmd ycmd cuda-mode cdlatex auctex smartparens smartparens-mode counsel-projectile projectile ghub magit company-c-headers company yasnippet spacemacs-theme atom-one-dark atom-one-dark-theme moe-theme session use-package paradox evil-surround evil-nerd-commenter)))
  '(projectile-mode-line (quote (:eval (format " P[%s]" (projectile-project-name)))))
  '(projectile-other-file-alist
    (quote
@@ -77,6 +77,8 @@
  '(safe-local-variable-values
    (quote
     ((zotero-collection . "20")
+    ((cmake-ide-build-dir . "/home/alex/Projects/Aperture/ninja")
+     (cmake-ide-dir . "/home/alex/Projects/Aperture/ninja")
      (cmake-ide-build-dir . "/home/alex/Projects/1Dpic/ninja")
      (cmake-ide-dir . "/home/alex/Projects/1Dpic/ninja")
      company-clang-arguments "-std=c++11" "-I/home/alex/Programs/Pulsar/include/" "-I/home/alex/Programs/Pulsar/CudaLE/include/")))
