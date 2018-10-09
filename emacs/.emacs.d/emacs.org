@@ -1006,24 +1006,7 @@ experience. First is the big dependency which is AUCTeX:
 	    "R" #'latex-evil-fold-more))
     (evil-outline-folding-latex)
 
-    ;; Here we configure synctex which provides bi-directional mapping
-    ;; between the pdf file and the latex source file. Clicking on the
-    ;; pdf file will allow you to jump to the corresponding line in
-    ;; the latex source, and vice versa.
-    (defun setup-synctex-latex ()
-    (setq TeX-source-correlate-method (quote synctex))
-    (setq TeX-source-correlate-mode t)
-    (setq TeX-source-correlate-start-server t)
-    (setq TeX-view-program-list
-	    (quote
-	    (("Okular" "okular --unique \"%o#src:%n$(pwd)/./%b\""))))
-    (setq TeX-view-program-selection
-	    (quote
-	    (((output-dvi style-pstricks)
-		"dvips and gv")
-	    (output-dvi "xdvi")
-	    (output-pdf "Okular")
-	    (output-html "xdg-open"))))))
+    )
 
     (add-hook 'LaTeX-mode-hook 'my-initialize-latex)
 
@@ -1033,7 +1016,30 @@ experience. First is the big dependency which is AUCTeX:
     (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
     (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
     (add-hook 'LaTeX-mode-hook 'zotelo-minor-mode)
+    ;; Here we configure synctex which provides bi-directional mapping
+    ;; between the pdf file and the latex source file. Clicking on the
+    ;; pdf file will allow you to jump to the corresponding line in
+    ;; the latex source, and vice versa.
+    (defun setup-synctex-latex ()
+	(setq TeX-source-correlate-method (quote synctex))
+	(setq TeX-source-correlate-mode t)
+	(setq TeX-source-correlate-start-server t)
+	(setq TeX-view-program-list
+		(quote
+		(("Okular" "okular --unique \"%o#src:%n$(pwd)/./%b\""))))
+	(setq TeX-view-program-selection
+		(quote
+		(((output-dvi style-pstricks)
+		    "dvips and gv")
+		(output-dvi "xdvi")
+		(output-pdf "Okular")
+		(output-html "xdg-open")))))
     (add-hook 'LaTeX-mode-hook 'setup-synctex-latex)
+
+    ;; Enable latexmk
+    (use-package auctex-latexmk :ensure t
+      :init
+      (auctex-latexmk-setup))
 ))
 #+END_SRC
 
@@ -1589,7 +1595,6 @@ Add misc modes:
 #+BEGIN_SRC emacs-lisp
 (add-to-list 'auto-mode-alist '(".offlineimaprc\\'" . conf-mode)) 
 #+END_SRC
-
 
 * Window Manipulation
 Here we define some convenient keys for window manipulation, mostly inspired by spacemacs
