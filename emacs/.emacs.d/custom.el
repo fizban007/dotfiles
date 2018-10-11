@@ -81,7 +81,7 @@
      (cmake-ide-dir . "/home/alex/Projects/Aperture/ninja")
      (cmake-ide-build-dir . "/home/alex/Projects/1Dpic/ninja")
      (cmake-ide-dir . "/home/alex/Projects/1Dpic/ninja")
-     company-clang-arguments "-std=c++11" "-I/home/alex/Programs/Pulsar/include/" "-I/home/alex/Programs/Pulsar/CudaLE/include/")))
+     company-clang-arguments "-std=c++11" "-I/home/alex/Programs/Pulsar/include/" "-I/home/alex/Programs/Pulsar/CudaLE/include/"))))
  '(send-mail-function (quote smtpmail-send-it))
  '(session-use-package t nil (session))
  '(writeroom-global-effects
