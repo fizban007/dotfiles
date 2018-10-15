@@ -1655,8 +1655,8 @@ current frame."
     "-" 'split-window-below
     "d" 'delete-window
     "1" 'delete-other-windows
-    "w" 'ace-window
-)
+    "2" 'make-frame-command
+    "w" 'ace-window)
 
 (general-nvmap
   :prefix "SPC"
