@@ -920,7 +920,7 @@ experience. First is the big dependency which is AUCTeX:
 (use-package auctex :ensure t ;; use LaTeX mode for .tex files 
   :mode
     ("\\.tex\\'" . LaTeX-mode) ;; Delay the configuratio until LaTeX mode is loaded 
-  :config 
+  :init
   (progn ;; These are my customary settings 
   (defun my-initialize-latex ()
     ;; Zotelo is a package which interacts with Zotero through the
@@ -1566,15 +1566,35 @@ for mass search replace.
 The markdown-mode package is exellent. We have a custom setting simply
 because we want to use gfm-mode on README.md files
 #+BEGIN_SRC emacs-lisp
-(use-package markdown-mode :ensure t
-:commands (markdown-mode gfm-mode)
-:mode (("README\\.md\\'" . gfm-mode)
-       ("\\.md\\'" . markdown-mode)
-       ("\\.markdown\\'" . markdown-mode))
-:init
-  (add-hook 'gfm-mode-hook
-            (lambda ()
-              (setq markdown-command "marked"))))
+  ;; This is taken from
+  ;; https://azer.bike/journal/ia-writer-mode-for-emacs/, which tries to
+  ;; mimic iA writer with Emacs and gets pretty close
+  (defun writing-mode ()
+    (interactive)
+    (setq buffer-face-mode-face '(:family "dejavu sans mono" :height 100))
+    (buffer-face-mode)
+    (linum-mode 0)
+    (use-package writeroom-mode :ensure t)
+    (writeroom-mode 1)
+    (blink-cursor-mode)
+    (visual-line-mode 1)
+    (setq truncate-lines nil)
+    (setq line-spacing 5)
+    ;; (setq global-hl-line-mode nil)
+    )
+
+
+  (use-package markdown-mode :ensure t
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md\\'" . gfm-mode)
+	 ("\\.md\\'" . markdown-mode)
+	 ("\\.markdown\\'" . markdown-mode))
+  :init
+    (add-hook 'markdown-mode-hook 'writing-mode)
+    (add-hook 'gfm-mode-hook 'writing-mode)
+    (add-hook 'gfm-mode-hook
+	      (lambda ()
+		(setq markdown-command "marked"))))
 #+END_SRC
 
 Lua-mode is mostly for editing awesome window manager configurations
@@ -1708,7 +1728,7 @@ the =session.el= to support cross-session history.
     (server-start))
   ;; Maintain a list of recently opened files
   (recentf-mode 1)
-  (setq recentf-max-menu-items 25)
+  (setq recentf-max-menu-items 50)
 #+END_SRC
 
     
