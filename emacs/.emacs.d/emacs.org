@@ -578,6 +578,7 @@ to satisfy my needs.
 	"C-w" 'backward-kill-word
 	"C-y" 'yank
 	"C-k" 'kill-line
+	"C-a" 'smarter-move-beginning-of-line
 	)
       (general-define-key
 	:states '(insert emacs)
