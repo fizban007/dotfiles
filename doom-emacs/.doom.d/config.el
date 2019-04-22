@@ -38,7 +38,8 @@
         (:leader
           (:desc "window" :prefix "w"
             :desc "evil-window-vsplit" :nv "/" #'evil-window-vsplit
-            :desc "evil-window-delete" :nv "d" #'evil-window-delete))
+            :desc "evil-window-delete" :nv "d" #'evil-window-delete
+            :desc "alternate-window"   :nv "TAB" #'+spacemacs/alternate-window))
 
         (:leader
           (:desc "project" :prefix "p"
@@ -48,11 +49,9 @@
         (:leader
           (:desc "file" :prefix "f"
             :desc "neotree-show" :nv "n" #'neotree-toggle))
-        ;; :leader (:prefix ("c" . "code")
-        ;;   :desc "Comment or uncomment lines"    "l" #'evil-commentary-line
-        ;;   :desc "evil-commentary-yank-line"        "y" #'evil-commentary-yank-line)
 
-        (:leader (:desc "workspace" :prefix "k"))
+        (:leader
+          (:desc "alternate-buffer" :nv "TAB" #'+spacemacs/alternate-buffer))
         ))
 
 (def-package! evil-nerd-commenter
