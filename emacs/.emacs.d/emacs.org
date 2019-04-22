@@ -2,6 +2,7 @@
 #+AUTHOR: Alex Chen
 #+PROPERTY: header-args:emacs-lisp :tangle yes
 #+PROPERTY: mkdirp yes
+#+PROPERTY: header-args :tangle init.el
 #+OPTIONS: toc:2 num:nil ^:nil
 
 * Introduction
@@ -1097,7 +1098,7 @@ Simply turns on smart parens mode globally.
 
 * Flycheck mode
 =flycheck= is a automatic syntax checking mode
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package flycheck :ensure t
   :diminish "Ⓕ"
   :init
@@ -1160,9 +1161,46 @@ comes to modern C++. Luckily there’s a remedy:
   )
 #+END_SRC
 
+We try out =ccls= to do autocompletion
+#+BEGIN_SRC emacs-lisp
+(use-package lsp-mode :ensure t :commands lsp)
+(use-package lsp-ui :ensure t :commands lsp-ui-mode)
+(use-package company-lsp :ensure t :commands company-lsp)
+
+(use-package ccls :ensure t
+             :hook ((c-mode c++-mode objc-mode cuda-mode) .
+                    (lambda ()
+	                  (require 'ccls)
+	                  (lsp)
+                      (general-define-key
+	                   :keymaps '(c++-mode-map cuda-mode-map)
+	                   :states '(normal visual insert emacs)
+                       "M-?" 'lsp-find-references
+                       "M-." 'lsp-find-definition)
+	                  ;; (flymake-mode -1)
+	                  ))
+             :init
+             (setq ccls-args '("--log-file=/tmp/ccls.log" "-v=1" "--init={\"cacheFormat\": \"json\"}"))
+             ;; (setq ccls-initialization-options '(:index (:comments 2) :completion (:detailedLabel t)))
+             (setq ccls-sem-highlight-method 'font-lock)
+             (add-to-list 'projectile-globally-ignored-directories ".ccls-cache")
+             )
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package eglot :ensure t
+:hook ((c-mode c++-mode objc-mode cuda-mode) .
+         (lambda ()
+           (add-to-list 'eglot-server-programs '(cuda-mode . ("ccls" "--log-file=/tmp/ccls.log")))
+	   (eglot-ensure)
+	   ;; (flymake-mode -1)
+	   ))
+)
+#+END_SRC
+
 
 Now initialize =ycmd= to do autocompletion
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package ycmd :ensure t
 :defer t
 :diminish nil
@@ -1214,7 +1252,8 @@ Finally we need =cmake-mode= to handle =CMakelists.txt= files
   (progn
     (elpy-enable)
     (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-    (add-hook 'elpy-mode-hook 'flycheck-mode)))
+    ;;(add-hook 'elpy-mode-hook 'flycheck-mode))
+))
 #+END_SRC
 
 * Org Mode
