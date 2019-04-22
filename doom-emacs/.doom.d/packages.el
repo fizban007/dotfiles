@@ -7,3 +7,8 @@
 ;; (package! builtin-package :disable t)
 (package! evil-nerd-commenter)
 (package! ag)
+(package! auctex-latexmk)
+(package! cdlatex)
+(package! org-mu4e :disable t)
+(package! evil-snipe :disable t)
+(package! evil-commentary :disable t)
