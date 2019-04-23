@@ -9,6 +9,8 @@
 (package! ag)
 (package! auctex-latexmk)
 (package! cdlatex)
+(package! wgrep-ag)
+(package! pkgbuild-mode)
 (package! org-mu4e :disable t)
 (package! evil-snipe :disable t)
 (package! evil-commentary :disable t)

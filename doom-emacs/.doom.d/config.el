@@ -24,6 +24,7 @@
         :nv "z m" #'hs-hide-level
         :nv "s" #'evil-substitute
         :nv "S" #'evil-change-whole-line
+        :nv ";" #'evil-repeat-find-char
 
         :nvi "C-n" #'evil-next-line
         :nvi "C-p" #'evil-previous-line
@@ -34,12 +35,15 @@
         :nvi "C-y" #'evil-paste-before
 
         :nvi "C-c g" #'magit-status
+        :nvi "C-x C-j" #'dired-jump
 
         (:leader
           (:desc "window" :prefix "w"
             :desc "evil-window-vsplit" :nv "/" #'evil-window-vsplit
             :desc "evil-window-delete" :nv "d" #'evil-window-delete
-            :desc "alternate-window"   :nv "TAB" #'+spacemacs/alternate-window))
+            :desc "alternate-window"   :nv "TAB" #'+spacemacs/alternate-window
+            :desc "+evil/window-move-left" :nv "J" #'+evil/window-move-left
+            :desc "+evil/window-move-up"   :nv "H" #'+evil/window-move-up))
 
         (:leader
           (:desc "project" :prefix "p"
@@ -48,17 +52,28 @@
 
         (:leader
           (:desc "file" :prefix "f"
-            :desc "neotree-show" :nv "n" #'neotree-toggle))
+            :desc "treemacs-toggle" :nv "n" #'+treemacs/toggle
+            :desc "treemacs-find-file" :nv "t" #'+treemacs/find-file))
 
         (:leader
           (:desc "alternate-buffer" :nv "TAB" #'+spacemacs/alternate-buffer))
         ))
 
+(after! treemacs-evil
+  (define-key! evil-treemacs-state-map
+    "n" #'treemacs-next-line
+    "p" #'treemacs-previous-line
+    "j" #'treemacs-root-up
+    "l" #'treemacs-root-down)
+  )
+
 (def-package! evil-nerd-commenter
   :init
-  (map! (:leader (:desc "code" :prefix "c"
-                   :desc "evilnc-copy-and-comment-lines" :nv "y" #'evilnc-copy-and-comment-lines
-                   :desc "evilnc-comment-or-uncomment-lines"     :nv "l" #'evilnc-comment-or-uncomment-lines)))
+  (map!
+   (:leader
+     (:desc "code" :prefix "c"
+       :desc "evilnc-copy-and-comment-lines" :nv "y" #'evilnc-copy-and-comment-lines
+       :desc "evilnc-comment-or-uncomment-lines"     :nv "l" #'evilnc-comment-or-uncomment-lines)))
   )
 
 (def-package! auctex-latexmk
@@ -70,7 +85,14 @@
   (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex))
 
-;; (map! :nvi "C-c g" #'magit-status)
+(def-package! wgrep-ag
+  :init
+  (autoload 'wgrep-ag-setup "wgrep-ag")
+  (add-hook 'ag-mode-hook 'wgrep-ag-setup))
+
+(def-package! pkgbuild-mode
+  :commands (pkgbuild-mode)
+  :mode (("PKGBUILD\\'" . pkgbuild-mode)))
 
 ;; Completion at point
 (after! company
