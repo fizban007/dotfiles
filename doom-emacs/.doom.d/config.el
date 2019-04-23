@@ -82,7 +82,7 @@
   (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
   (add-hook 'LaTeX-mode-hook (lambda () (TeX-fold-mode 1)))
   (add-hook 'LaTeX-mode-hook #'+my-initialize-latex)
-  (add-hook 'LaTeX-mode-hook #'+setup-synctex-latex)
+  (add-hook 'LaTeX-mode-hook #'+my-setup-synctex-latex)
   )
 
 (def-package! zotelo
@@ -114,9 +114,8 @@
 
 ;; Completion at point
 (after! company
-  :config
-  (defun check-expansion ()
-	(save-excursion
+  (defun +my-check-expansion ()
+    (save-excursion
 	  (if (looking-at "\\_>") t
 	    (backward-char 1)
 	    (if (looking-at "\\.") t
@@ -127,21 +126,20 @@
 		      (backward-char 1)
 		      (if (looking-at "->\ ") t nil)))))))
 
-  (defun do-yas-expand ()
-	(let ((yas-fallback-behavior 'return-nil))
+  (defun +my-do-yas-expand ()
+    (let ((yas-fallback-behavior 'return-nil))
 	  (yas/expand)))
 
-  (defun tab-indent-or-complete ()
-	(interactive)
-	(if (minibufferp)
+  (defun +my-tab-indent-or-complete ()
+    (interactive)
+    (if (minibufferp)
 	    (minibuffer-complete)
 	  (if (or (not yas/minor-mode)
-		      (null (do-yas-expand)))
-		  (if (check-expansion)
+		      (null (+my-do-yas-expand)))
+		  (if (+my-check-expansion)
 		      (company-complete-common)
 		    (indent-for-tab-command)))))
-
-  (map! :i "TAB" #'tab-indent-or-complete)
+  (map! :i "TAB" '+my-tab-indent-or-complete)
   )
 
 ;; Handle email

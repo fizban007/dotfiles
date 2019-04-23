@@ -127,7 +127,7 @@ current frame."
   (evil-outline-folding-latex))
 
 ;;;###autoload
-(defun +setup-synctex-latex ()
+(defun +my-setup-synctex-latex ()
   ;; Use pdf-tools to open PDF files
   (setq TeX-view-program-selection '((output-pdf "PDF Tools"))
         TeX-source-correlate-start-server t)
@@ -144,3 +144,4 @@ current frame."
 		  (output-dvi "xdvi")
 		  (output-pdf "PDF Tools")
 		  (output-html "xdg-open")))))
+
