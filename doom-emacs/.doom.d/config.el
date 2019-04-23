@@ -11,6 +11,8 @@
 
 (prefer-coding-system 'utf-8)
 (setq doom-font (font-spec :family "Source Code Pro" :size 13))
+;; (setq doom-theme 'doom-one-light)
+(setq doom-theme 'doom-one)
 (setq which-key-idle-delay 0)
 
 ;; Key bindings
@@ -60,25 +62,41 @@
         ))
 
 (after! treemacs-evil
-  (define-key! evil-treemacs-state-map
-    "n" #'treemacs-next-line
-    "p" #'treemacs-previous-line
-    "j" #'treemacs-root-up
-    "l" #'treemacs-root-down)
+  (add-hook 'treemacs-mode-hook (lambda ()
+                                  (define-key! evil-treemacs-state-local-map
+                                    "k" #'treemacs-next-line
+                                    "h" #'treemacs-previous-line
+                                    "j" #'treemacs-root-up
+                                    "l" #'treemacs-root-down)
+                                  )))
+
+(after! pdf-tools
+  (map! :map pdf-view-mode-map
+        :gn "h" #'evil-collection-pdf-view-previous-line-or-previous-page
+        :gn "k" #'evil-collection-pdf-view-next-line-or-next-page
+        :gn "j" #'image-backward-hscroll))
+
+(after! latex
+  :config
+  (add-hook 'LaTeX-mode-hook #'LaTeX-math-mode)
+  (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
+  (add-hook 'LaTeX-mode-hook (lambda () (TeX-fold-mode 1)))
+  (add-hook 'LaTeX-mode-hook #'+my-initialize-latex)
+  (add-hook 'LaTeX-mode-hook #'+setup-synctex-latex)
   )
+
+(def-package! zotelo
+  :init
+  (add-hook 'LaTeX-mode-hook 'zotelo-minor-mode))
 
 (def-package! evil-nerd-commenter
   :init
   (map!
    (:leader
      (:desc "code" :prefix "c"
-       :desc "evilnc-copy-and-comment-lines" :nv "y" #'evilnc-copy-and-comment-lines
+       :desc "evilnc-copy-and-comment-lines"         :nv "y" #'evilnc-copy-and-comment-lines
        :desc "evilnc-comment-or-uncomment-lines"     :nv "l" #'evilnc-comment-or-uncomment-lines)))
   )
-
-(def-package! auctex-latexmk
-  :init
-  (auctex-latexmk-setup))
 
 (def-package! cdlatex
   :init
