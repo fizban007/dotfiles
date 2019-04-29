@@ -14,6 +14,7 @@
 ;; (setq doom-theme 'doom-one-light)
 (setq doom-theme 'doom-one)
 (setq which-key-idle-delay 0)
+(setq doom--line-number-style 'normal)
 
 ;; Key bindings
 (after! evil
@@ -45,21 +46,97 @@
             :desc "evil-window-delete" :nv "d" #'evil-window-delete
             :desc "alternate-window"   :nv "TAB" #'+spacemacs/alternate-window
             :desc "+evil/window-move-left" :nv "J" #'+evil/window-move-left
-            :desc "+evil/window-move-up"   :nv "H" #'+evil/window-move-up))
+            :desc "+evil/window-move-up"   :nv "H" #'+evil/window-move-up)
 
-        (:leader
           (:desc "project" :prefix "p"
             :desc "+ivy/projectile-find-file" :nv "f" #'+ivy/projectile-find-file
-            :desc "+ivy/project-search"       :nv "s" #'+ivy/project-search))
+            :desc "+ivy/project-search"       :nv "s" #'+ivy/project-search)
 
-        (:leader
           (:desc "file" :prefix "f"
             :desc "treemacs-toggle" :nv "n" #'+treemacs/toggle
-            :desc "treemacs-find-file" :nv "t" #'+treemacs/find-file))
+            :desc "treemacs-find-file" :nv "t" #'+treemacs/find-file)
 
-        (:leader
           (:desc "alternate-buffer" :nv "TAB" #'+spacemacs/alternate-buffer))
         ))
+
+
+
+(map!
+ "C-x p"   #'+popup/other
+ "C-`"     #'+popup/toggle
+ "C-~" #'+popup/raise
+ ;; smartparens
+ (:after smartparens
+   :map smartparens-mode-map
+   "C-M-a"     #'sp-beginning-of-sexp
+   "C-M-e"     #'sp-end-of-sexp
+   "C-M-f"     #'sp-forward-sexp
+   "C-M-b"     #'sp-backward-sexp
+   "C-M-d"     #'sp-splice-sexp
+   "C-M-k"     #'sp-kill-sexp
+   "C-M-t"     #'sp-transpose-sexp
+   "C-<right>" #'sp-forward-slurp-sexp
+   "M-<right>" #'sp-forward-barf-sexp
+   "C-<left>"  #'sp-backward-slurp-sexp
+   "M-<left>" #'sp-backward-barf-sexp)
+ ;; company mode
+ (:after company
+   :map company-active-map
+   "C-o"        #'company-search-kill-others
+   "C-n"        #'company-select-next
+   "C-p"        #'company-select-previous
+   "C-h"        #'company-quickhelp-manual-begin
+   "C-S-h"      #'company-show-doc-buffer
+   "C-s"        #'company-search-candidates
+   "M-s"        #'company-filter-candidates
+   "<C-tab>"    #'company-complete-common-or-cycle
+   [tab]        #'company-complete-common-or-cycle
+   [backtab]    #'company-select-previous
+   "C-RET"      #'counsel-company
+   :map company-search-map
+   "C-n"        #'company-search-repeat-forward
+   "C-p"        #'company-search-repeat-backward
+   "C-s" (λ! (company-search-abort) (company-filter-candidates)))
+ (:when (featurep! :editor multiple-cursors)
+   ;; evil-mc
+   (:prefix "gz"
+     :nv "d" #'evil-mc-make-and-goto-next-match
+     :nv "D" #'evil-mc-make-and-goto-prev-match
+     :nv "k" #'evil-mc-make-cursor-move-next-line
+     :nv "h" #'evil-mc-make-cursor-move-prev-line
+     :nv "m" #'evil-mc-make-all-cursors
+     :nv "n" #'evil-mc-make-and-goto-next-cursor
+     :nv "N" #'evil-mc-make-and-goto-last-cursor
+     :nv "p" #'evil-mc-make-and-goto-prev-cursor
+     :nv "P" #'evil-mc-make-and-goto-first-cursor
+     :nv "q" #'evil-mc-undo-all-cursors
+     :nv "t" #'+multiple-cursors/evil-mc-toggle-cursors
+     :nv "u" #'evil-mc-undo-last-added-cursor
+     :nv "z" #'+multiple-cursors/evil-mc-make-cursor-here)
+   (:after evil-mc
+     :map evil-mc-key-map
+     :nv "C-n" #'evil-mc-make-and-goto-next-cursor
+     :nv "C-N" #'evil-mc-make-and-goto-last-cursor
+     :nv "C-p" #'evil-mc-make-and-goto-prev-cursor
+     :nv "C-P" #'evil-mc-make-and-goto-first-cursor)
+   ;; evil-multiedit
+   :v  "R"     #'evil-multiedit-match-all
+   :n  "M-d"   #'evil-multiedit-match-symbol-and-next
+   :n  "M-D"   #'evil-multiedit-match-symbol-and-prev
+   :v  "M-d"   #'evil-multiedit-match-and-next
+   :v  "M-D"   #'evil-multiedit-match-and-prev
+   :nv "C-M-d" #'evil-multiedit-restore
+   (:after evil-multiedit
+     (:map evil-multiedit-state-map
+       "M-d"    #'evil-multiedit-match-and-next
+       "M-D"    #'evil-multiedit-match-and-prev
+       "RET"    #'evil-multiedit-toggle-or-restrict-region
+       [return] #'evil-multiedit-toggle-or-restrict-region)
+     (:map (evil-multiedit-state-map evil-multiedit-insert-state-map)
+       "C-n" #'evil-multiedit-next
+       "C-p" #'evil-multiedit-prev)))
+
+ )
 
 (after! treemacs-evil
   (add-hook 'treemacs-mode-hook (lambda ()
@@ -218,6 +295,7 @@
                 account-vars)
         (error "No email account found"))))
   (add-hook 'mu4e-compose-pre-hook 'my-mu4e-set-account)
+  (add-hook 'mu4e-compose-mode-hook #'turn-on-auto-fill)
 
   (setq mu4e-maildir-shortcuts
         '( ("/Gmail/Primary"       . ?g)
@@ -231,7 +309,7 @@
     '(mu4e-main-mode
       mu4e-view-mode
       mu4e-headers-mode
-      mu4e-compose-mode
+      ;; mu4e-compose-mode
       mu4e~update-mail-mode)
     'emacs)
   )
