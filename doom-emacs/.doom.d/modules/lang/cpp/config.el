@@ -195,3 +195,16 @@ This is ignored by ccls.")
     (add-to-list 'projectile-project-root-files-bottom-up ".ccls-root"))
     ;; (add-to-list 'projectile-project-root-files-top-down-recurring "compile_commands.json"))
   )
+
+(load "/usr/share/clang/clang-format.el")
+(after! cuda-mode
+  (add-hook 'cuda-mode-hook
+            (lambda ()
+              (progn
+                (general-define-key :major-modes '(cuda-mode) :prefix doom-localleader-key :states 'visual
+                                    "f"
+                                    (list :def 'clang-format-region :which-key "clang-format-region"))
+                (general-define-key :major-modes '(cuda-mode) :prefix doom-localleader-key :states 'normal
+                                    "f"
+                                    (list :def 'clang-format-buffer :which-key "clang-format-buffer")))
+              )))

@@ -217,7 +217,17 @@
 		      (company-complete-common)
 		    (indent-for-tab-command)))))
   (map! :i "TAB" '+my-tab-indent-or-complete)
+  (setq company-idle-delay 0.2)
   )
+
+;; Load snippets
+;; (after! yasnippet
+;;   (setq +snippets-dir "~/dotfiles/emacs/.emacs.d/snippets")
+;;   ;; (yas-load-directory "~/dotfiles/emacs/.emacs.d/snippets")
+;;   ;; (add-to-list 'yas-snippet-dirs "~/dotfiles/emacs/.emacs.d/snippets")
+;;   ;; (setq yas-snippet-dirs (append yas-snippet-dirs
+;;   ;;                              '("~/dotfiles/emacs/.emacs.d/snippets")))
+;;   )
 
 ;; Handle email
 (setq +email-backend 'offlineimap)
