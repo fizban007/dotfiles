@@ -201,10 +201,10 @@ This is ignored by ccls.")
   (add-hook 'cuda-mode-hook
             (lambda ()
               (progn
-                (general-define-key :major-modes '(cuda-mode) :prefix doom-localleader-key :states 'visual
+                (general-define-key :keymaps 'cuda-mode-map :prefix doom-localleader-key :states 'visual
                                     "f"
                                     (list :def 'clang-format-region :which-key "clang-format-region"))
-                (general-define-key :major-modes '(cuda-mode) :prefix doom-localleader-key :states 'normal
+                (general-define-key :keymaps 'cuda-mode-map :prefix doom-localleader-key :states 'normal
                                     "f"
                                     (list :def 'clang-format-buffer :which-key "clang-format-buffer")))
               )))

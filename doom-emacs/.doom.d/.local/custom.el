@@ -52,8 +52,7 @@
  '(magit-use-overlays nil)
  '(org-format-latex-options
    (quote
-    (:foreground default :background default :scale 1.5 :html-foreground "Black"
-                 :html-background "Transparent" :html-scale 1.0 :matchers
+    (:foreground default :background "#282c34" :scale 1.5 :html-foreground "Black" :html-background "Transparent" :html-scale 1.0 :matchers
                  ("begin" "$1" "$" "$$" "\\(" "\\["))))
  '(projectile-mode-line (quote (:eval (format " P[%s]" (projectile-project-name)))))
  '(projectile-other-file-alist
@@ -80,7 +79,9 @@
      ("gpg" ""))))
  '(safe-local-variable-values
    (quote
-    ((cmake-ide-build-dir . "/home/alex/Projects/Aperture/ninja")
+    ((magit-todos-exclude-globs "deps/*")
+     (magit-todos-exclude-globs . deps/*)
+     (cmake-ide-build-dir . "/home/alex/Projects/Aperture/ninja")
      (cmake-ide-dir . "/home/alex/Projects/Aperture/ninja")
      (cmake-ide-build-dir . "/home/alex/Projects/Aperture2/ninja")
      (cmake-ide-dir . "/home/alex/Projects/Aperture2/ninja")

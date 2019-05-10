@@ -60,6 +60,16 @@
         ))
 
 
+(after! evil-collection
+  (defun my-hjkl-rotation (_mode mode-keymaps &rest _rest)
+    (evil-collection-translate-key 'normal mode-keymaps
+      "k" "j"
+      "h" "k"
+      "j" "h"))
+
+  ;; called after evil-collection makes its keybindings
+  (add-hook 'evil-collection-setup-hook #'my-hjkl-rotation)
+  )
 
 (map!
  "C-x p"   #'+popup/other
@@ -97,6 +107,15 @@
    "C-n"        #'company-search-repeat-forward
    "C-p"        #'company-search-repeat-backward
    "C-s" (λ! (company-search-abort) (company-filter-candidates)))
+
+ (:after magit
+   :map magit-mode-map
+   :nv "k"     #'magit-next-line
+   :nv "K"     #'magit-section-forward
+   :nv "h"     #'magit-previous-line
+   :nv "H"     #'magit-section-forward
+   )
+
  (:when (featurep! :editor multiple-cursors)
    ;; evil-mc
    (:prefix "gz"
@@ -230,7 +249,7 @@
 ;;   )
 
 ;; Handle email
-(setq +email-backend 'offlineimap)
+(setq +mu4e-backend 'offlineimap)
 (def-package! mu4e
   :init
   (setq mu4e-maildir "~/mail"
@@ -322,4 +341,5 @@
       ;; mu4e-compose-mode
       mu4e~update-mail-mode)
     'emacs)
+  (setq mu4e-update-interval 600)
   )

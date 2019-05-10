@@ -141,13 +141,16 @@
        ;; toward a specific purpose. They may have additional dependencies and
        ;; should be loaded late.
        :app
-       (email +gmail)    ; emacs as an email client
+       ;;(email +gmail)    ; emacs as an email client
        ;;irc               ; how neckbeards socialize
        ;;(rss +org)        ; emacs as an RSS reader
        ;;twitter           ; twitter client https://twitter.com/vnought
        (write            ; emacs as a word processor (latex + org + markdown)
        ;; +wordnut         ; wordnet (wn) search
         +langtool)       ; a proofreader (grammar/style check) for Emacs
+       
+       :email
+       mu4e
 
        :collab
        ;;floobits          ; peer programming for a price
@@ -161,4 +164,6 @@
        ;; The default module sets reasonable defaults for Emacs. It also
        ;; provides a Spacemacs-inspired keybinding scheme and a smartparens
        ;; config. Use it as a reference for your own modules.
-       (default +bindings +smartparens))
+       (default +bindings +smartparens)
+
+       )
