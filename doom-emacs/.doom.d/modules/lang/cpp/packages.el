@@ -11,6 +11,7 @@
 (package! cmake-mode)
 
 (package! ccls)
+;; (package! eglot)
 
 (when (package! glsl-mode)
   (when (featurep! :completion company)

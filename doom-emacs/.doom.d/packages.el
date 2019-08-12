@@ -11,6 +11,8 @@
 (package! wgrep-ag)
 (package! pkgbuild-mode)
 (package! zotelo)
+(package! google-c-style)
 (package! org-mu4e :disable t)
 (package! evil-snipe :disable t)
 (package! evil-commentary :disable t)
+(package! company-prescient :disable t)

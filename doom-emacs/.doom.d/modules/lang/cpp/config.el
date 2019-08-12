@@ -186,7 +186,7 @@ This is ignored by ccls.")
     (lsp)
     (map! "M-?" #'lsp-find-references
           "M-." #'lsp-find-definition)
-    (setq ccls-args '("--log-file=/tmp/ccls.log" "-v=1" "--init={\"cacheFormat\": \"json\"}"))
+    ;; (setq ccls-args '("--log-file=/tmp/ccls.log" "-v=1" "--init={\"cacheFormat\": \"json\"}"))
     ;; (setq ccls-initialization-options '(:index (:comments 2) :completion (:detailedLabel t)))
     (setq ccls-sem-highlight-method 'font-lock)
     )
@@ -195,16 +195,22 @@ This is ignored by ccls.")
     (add-to-list 'projectile-project-root-files-bottom-up ".ccls-root"))
     ;; (add-to-list 'projectile-project-root-files-top-down-recurring "compile_commands.json"))
   )
+;; (def-package! eglot
+;;   :init
+;;   (after! projectile
+;;     (add-to-list 'projectile-globally-ignored-directories ".ccls-cache")
+;;     (add-to-list 'projectile-project-root-files-bottom-up ".ccls-root"))
+;;   )
 
 (load "/usr/share/clang/clang-format.el")
 (after! cuda-mode
   (add-hook 'cuda-mode-hook
             (lambda ()
               (progn
-                (general-define-key :major-modes '(cuda-mode) :prefix doom-localleader-key :states 'visual
+                (general-define-key :keymaps 'cuda-mode-map :prefix doom-localleader-key :states 'visual
                                     "f"
                                     (list :def 'clang-format-region :which-key "clang-format-region"))
-                (general-define-key :major-modes '(cuda-mode) :prefix doom-localleader-key :states 'normal
+                (general-define-key :keymaps 'cuda-mode-map :prefix doom-localleader-key :states 'normal
                                     "f"
                                     (list :def 'clang-format-buffer :which-key "clang-format-buffer")))
               )))

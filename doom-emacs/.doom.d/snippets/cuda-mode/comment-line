@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: line comment
+# key: cfl
+# --
+// ----- $1 ----- $0

@@ -73,7 +73,9 @@ current frame."
   (setq TeX-math-close-double-dollar t)
 
   (setq LaTeX-command-style '(("" "%(PDF)%(latex) -file-line-error %S%(PDFout)")))
-  (global-set-key (kbd "C-c +") 'cdlatex-item)
+  ;; (global-set-key (kbd "C-c +") 'cdlatex-item)
+  (general-define-key :keymaps 'LaTeX-mode-map (kbd "C-c +") 'cdlatex-item)
+  (general-define-key :keymaps 'LaTeX-mode-map (kbd "TAB") 'cdlatex-tab)
 
   ;; These settings make evil folding work better with LaTeX mode
   (defun evil-outline-folding-latex ()
@@ -113,24 +115,14 @@ current frame."
 	  (incf evil-fold-level)
 	  (hide-sublevels (+ evil-fold-level 1)))
 
-	(map!
-	 :map LaTeX-mode-map
-	 :prefix "z"
-	 "o" #'latex-evil-open-folds-at-point
-	 "O" #'latex-evil-open-fold
-	 "c" #'latex-evil-close-folds-at-point
-	 "C" #'latex-evil-close-fold
-	 "m" #'latex-evil-close-all-folds
-	 "M" #'latex-evil-open-all-folds
-	 "r" #'latex-evil-fold-less
-	 "R" #'latex-evil-fold-more))
+	)
   (evil-outline-folding-latex))
 
 ;;;###autoload
 (defun +my-setup-synctex-latex ()
   ;; Use pdf-tools to open PDF files
-  (setq TeX-view-program-selection '((output-pdf "PDF Tools"))
-        TeX-source-correlate-start-server t)
+  ;; (setq TeX-view-program-selection '((output-pdf "PDF Tools"))
+  (setq TeX-source-correlate-start-server t)
   (setq TeX-source-correlate-method (quote synctex))
   (setq TeX-source-correlate-mode t)
   ;; (setq TeX-source-correlate-start-server t)
@@ -142,6 +134,6 @@ current frame."
 		 (((output-dvi style-pstricks)
 		   "dvips and gv")
 		  (output-dvi "xdvi")
-		  (output-pdf "PDF Tools")
+		  (output-pdf "Okular")
 		  (output-html "xdg-open")))))
 
