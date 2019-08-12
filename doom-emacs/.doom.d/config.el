@@ -10,7 +10,7 @@
 (set-language-environment "English")
 
 (prefer-coding-system 'utf-8)
-(setq doom-font (font-spec :family "Source Code Pro" :size 13))
+(setq doom-font (font-spec :family "Source Code Pro Medium" :size 13))
 ;; (setq doom-theme 'doom-one-light)
 (setq doom-theme 'doom-one)
 (setq which-key-idle-delay 0)
@@ -342,4 +342,29 @@
       mu4e~update-mail-mode)
     'emacs)
   (setq mu4e-update-interval 600)
+  (setq mu4e-compose-format-flowed nil)
   )
+
+(def-package! google-c-style
+  :init
+  (add-hook 'c-mode-common-hook (lambda () (google-set-c-style))))
+
+(load "/usr/share/clang/clang-format.el")
+(after! cuda-mode
+  (add-hook 'cuda-mode-hook
+            (lambda ()
+              (progn
+                (general-define-key :keymaps 'cuda-mode-map :prefix doom-localleader-key :states 'visual
+                                    "f"
+                                    (list :def 'clang-format-region :which-key "clang-format-region"))
+                (general-define-key :keymaps 'cuda-mode-map :prefix doom-localleader-key :states 'normal
+                                    "f"
+                                    (list :def 'clang-format-buffer :which-key "clang-format-buffer")))
+              )))
+
+(after! lsp
+  (add-to-list 'lsp-language-id-configuration '(cuda-mode . "cuda"))
+  (add-hook 'cuda-mode-hook
+            (lambda ()
+              (lsp))))
+(setq +cc-default-header-file-mode 'c++-mode)
