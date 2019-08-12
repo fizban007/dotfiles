@@ -32,6 +32,8 @@
         :nvi "C-n" #'evil-next-line
         :nvi "C-p" #'evil-previous-line
         :nvi "M-;" #'comment-dwim
+        :nvi "M-n" (lambda () (interactive) (scroll-up 2))
+        :nvi "M-p" (lambda () (interactive) (scroll-down 2))
 
         :v "C-k" #'kill-region
 
@@ -230,7 +232,7 @@
 ;;   )
 
 ;; Handle email
-(setq +email-backend 'offlineimap)
+(setq +mu4e-backend 'offlineimap)
 (def-package! mu4e
   :init
   (setq mu4e-maildir "~/mail"
