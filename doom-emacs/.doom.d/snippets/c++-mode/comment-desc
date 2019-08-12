@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: comment-desc
+# key: cfd
+# --
+/////////////////////////////////////////////////////////////////////////////////////////
+///
+///           \file  `(file-name-nondirectory (buffer-file-name))`
+///
+/// __Description__:     $0
+///
+/// __Last modified__:   <>\n
+/// __Version__:         1.0\n
+/// __Author__:          `(user-full-name)`, `(print user-mail-address)`\n
+/// __Organization__:    `(print user-organization)`
+///
+/////////////////////////////////////////////////////////////////////////////////////////
