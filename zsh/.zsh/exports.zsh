@@ -16,7 +16,7 @@ export WINEARCH=32
 export WINEPREFIX=~/win32
 export DMENU_OPTIONS='-fn xft:monospace-12 -r -x 0 -y 18 -nb #303030 -nf #909090 -sf #303030'
 export TODOTXT_DEFAULT_ACTION=ls
-export PATH="/opt/visit/bin:$PATH"
+export PATH="${HOME}/.emacs.d/bin:/opt/visit/bin:$PATH"
 # }}}
 
 # {{{ Dircolors - with rxvt-256color support

@@ -47,6 +47,9 @@
    (quote
     (eshell-mode wl-summary-mode compilation-mode text-mode dired-mode)))
  '(lsp-enable-completion-at-point nil)
+ '(lsp-file-watch-ignored
+   (quote
+    ("[/\\\\]\\.git$" "[/\\\\]\\.hg$" "[/\\\\]\\.bzr$" "[/\\\\]_darcs$" "[/\\\\]\\.svn$" "[/\\\\]_FOSSIL_$" "[/\\\\]\\.idea$" "[/\\\\]\\.ensime_cache$" "[/\\\\]\\.eunit$" "[/\\\\]node_modules$" "[/\\\\]\\.fslckout$" "[/\\\\]\\.tox$" "[/\\\\]\\.stack-work$" "[/\\\\]\\.bloop$" "[/\\\\]\\.metals$" "[/\\\\]target$" "[/\\\\]\\.deps$" "[/\\\\]build-aux$" "[/\\\\]autom4te.cache$" "[/\\\\]\\.reference$" "[/\\\\]deps$")))
  '(lsp-prefer-flymake nil)
  '(magit-diff-use-overlays nil)
  '(magit-use-overlays nil)
@@ -57,7 +60,7 @@
 		 ("begin" "$1" "$" "$$" "\\(" "\\["))))
  '(package-selected-packages
    (quote
-    (flymd impatient-mode posframe transient company-lsp emojify webkit-color-picker flymake lsp-ui ccls lsp-mode writeroom-mode eglot tablist dash powerline f with-editor wgrep spaceline async which-key swiper request-deferred request pyvenv ht highlight-indentation goto-chg ggtags evil glsl-mode git-commit general find-file-in-project cmake-ide auctex-latexmk magit-popup ivy counsel avy pkgbuild-mode lua-mode company-web company-web-html web-mode visual-fill-column-mode visual-fill-column flx doom-themes modern-cpp-font-lock yasnippet-snippets neotree ivy-rich all-the-icons-ivy spaceline-all-the-icons delight all-the-icons rainbow-delimiters material-theme flycheck-ycmd flycheck elpy cmake-mode smex markdown-mode wgrep-ag ag ace-window pdf-tools htmlize ox-pandoc company-ycmd ycmd cuda-mode cdlatex auctex smartparens smartparens-mode counsel-projectile projectile ghub magit company-c-headers company yasnippet spacemacs-theme atom-one-dark atom-one-dark-theme moe-theme session use-package paradox evil-surround evil-nerd-commenter)))
+    (treepy memoize jsonrpc dracula-theme dash-functional bind-key flymd impatient-mode posframe transient company-lsp emojify webkit-color-picker flymake lsp-ui ccls lsp-mode writeroom-mode eglot tablist dash powerline f with-editor wgrep spaceline async which-key swiper request-deferred request pyvenv ht highlight-indentation goto-chg ggtags evil glsl-mode git-commit general find-file-in-project cmake-ide auctex-latexmk magit-popup ivy counsel avy pkgbuild-mode lua-mode company-web company-web-html web-mode visual-fill-column-mode visual-fill-column flx doom-themes modern-cpp-font-lock yasnippet-snippets neotree ivy-rich all-the-icons-ivy spaceline-all-the-icons delight all-the-icons rainbow-delimiters material-theme flycheck-ycmd flycheck elpy cmake-mode smex markdown-mode wgrep-ag ag ace-window pdf-tools htmlize ox-pandoc company-ycmd ycmd cuda-mode cdlatex auctex smartparens smartparens-mode counsel-projectile projectile ghub magit company-c-headers company yasnippet spacemacs-theme atom-one-dark atom-one-dark-theme moe-theme session use-package paradox evil-surround evil-nerd-commenter)))
  '(projectile-mode-line (quote (:eval (format " P[%s]" (projectile-project-name)))))
  '(projectile-other-file-alist
    (quote
