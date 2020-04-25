@@ -1,4 +1,4 @@
-;;; ~/dotfiles/doom-emacs/.doom.d/autoload.el -*- lexical-binding: t; -*-
+;;; ~/.doom.d/autoload.el -*- lexical-binding: t; -*-
 
 ;;;###autoload
 (defun +spacemacs/window-layout-toggle ()
@@ -136,4 +136,3 @@ current frame."
 		  (output-dvi "xdvi")
 		  (output-pdf "Okular")
 		  (output-html "xdg-open")))))
-

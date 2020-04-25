@@ -1,20 +1,62 @@
-;;; ~/.doom.d/config.el -*- lexical-binding: t; -*-
+;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
-;; Place your private configuration here
+;; Place your private configuration here! Remember, you do not need to run 'doom
+;; sync' after modifying this file!
 
-;; Preferences
-(setq user-full-name "Alex Chen")
-(setq user-mail-address "fizban007@gmail.com")
-(setq user-organization "Princeton University")
+
+;; Some functionality uses this to identify you, e.g. GPG configuration, email
+;; clients, file templates and snippets.
+(setq user-full-name "Alex Chen"
+      user-mail-address "fizban007@gmail.com")
 
 (set-language-environment "English")
-
 (prefer-coding-system 'utf-8)
-(setq doom-font (font-spec :family "Source Code Pro Medium" :size 13))
-;; (setq doom-theme 'doom-one-light)
-(setq doom-theme 'doom-one)
+
+;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
+;; are the three important ones:
+;;
+;; + `doom-font'
+;; + `doom-variable-pitch-font'
+;; + `doom-big-font' -- used for `doom-big-font-mode'; use this for
+;;   presentations or streaming.
+;;
+;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
+;; font string. You generally only need these two:
+(setq doom-font (font-spec :family "Source Code Pro" :size 14))
 (setq which-key-idle-delay 0)
-(setq doom--line-number-style 'normal)
+;;(setq doom--line-number-style 'normal)
+
+;; There are two ways to load a theme. Both assume the theme is installed and
+;; available. You can either set `doom-theme' or manually load a theme with the
+;; `load-theme' function. This is the default:
+(setq doom-theme 'doom-vibrant)
+;; (setq doom-theme 'doom-solarized-dark)
+;; (setq doom-theme 'doom-city-lights)
+
+;; If you use `org' and don't want your org files in the default location below,
+;; change `org-directory'. It must be set before org loads!
+(setq org-directory "~/org/")
+
+;; This determines the style of line numbers in effect. If set to `nil', line
+;; numbers are disabled. For relative line numbers, set this to `relative'.
+(setq display-line-numbers-type t)
+
+;; Here are some additional functions/macros that could help you configure Doom:
+;;
+;; - `load!' for loading external *.el files relative to this one
+;; - `use-package' for configuring packages
+;; - `after!' for running code after a package has loaded
+;; - `add-load-path!' for adding directories to the `load-path', relative to
+;;   this file. Emacs searches the `load-path' when you load packages with
+;;   `require' or `use-package'.
+;; - `map!' for binding new keys
+;;
+;; To get information about any of these functions/macros, move the cursor over
+;; the highlighted symbol at press 'K' (non-evil users must press 'C-c g k').
+;; This will open documentation for it, including demos of how they are used.
+;;
+;; You can also try 'gd' (or 'C-c g d') to jump to their definition and see how
+;; they are implemented.
 
 ;; Key bindings
 (after! evil
@@ -183,11 +225,7 @@
   (add-hook 'LaTeX-mode-hook #'+my-setup-synctex-latex)
   )
 
-(def-package! zotelo
-  :init
-  (add-hook 'LaTeX-mode-hook 'zotelo-minor-mode))
-
-(def-package! evil-nerd-commenter
+(use-package! evil-nerd-commenter
   :init
   (map!
    (:leader
@@ -196,17 +234,12 @@
        :desc "evilnc-comment-or-uncomment-lines"     :nv "l" #'evilnc-comment-or-uncomment-lines)))
   )
 
-(def-package! cdlatex
+(use-package! cdlatex
   :init
   (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex))
 
-(def-package! wgrep-ag
-  :init
-  (autoload 'wgrep-ag-setup "wgrep-ag")
-  (add-hook 'ag-mode-hook 'wgrep-ag-setup))
-
-(def-package! pkgbuild-mode
+(use-package! pkgbuild-mode
   :commands (pkgbuild-mode)
   :mode (("PKGBUILD\\'" . pkgbuild-mode)))
 
@@ -214,48 +247,90 @@
 (after! company
   (defun +my-check-expansion ()
     (save-excursion
-	  (if (looking-at "\\_>") t
-	    (backward-char 1)
-	    (if (looking-at "\\.") t
-		  (backward-char 1)
-		  (if (looking-at "::") t
-		    ;; (backward-char 1)
-		    (if (looking-at "->") t
-		      (backward-char 1)
-		      (if (looking-at "->\ ") t nil)))))))
+      (if (looking-at "\\_>") t
+        (backward-char 1)
+        (if (looking-at "\\.") t
+          (backward-char 1)
+          (if (looking-at "::") t
+            ;; (backward-char 1)
+            (if (looking-at "->") t
+              (backward-char 1)
+              (if (looking-at "->\ ") t nil)))))))
 
   (defun +my-do-yas-expand ()
     (let ((yas-fallback-behavior 'return-nil))
-	  (yas/expand)))
+      (yas/expand)))
 
   (defun +my-tab-indent-or-complete ()
     (interactive)
     (if (minibufferp)
-	    (minibuffer-complete)
-	  (if (or (not yas/minor-mode)
-		      (null (+my-do-yas-expand)))
-		  (if (+my-check-expansion)
-		      (company-complete-common)
-		    (indent-for-tab-command)))))
-  (map! :i "TAB" '+my-tab-indent-or-complete)
+        (minibuffer-complete)
+      (if (or (not yas/minor-mode)
+              (null (+my-do-yas-expand)))
+          (if (+my-check-expansion)
+              (company-complete-common)
+            (indent-for-tab-command)))))
+  ;; (map! :i "TAB" '+my-tab-indent-or-complete)
   (setq company-idle-delay 0.2)
   )
 
-;; Load snippets
-;; (after! yasnippet
-;;   (setq +snippets-dir "~/dotfiles/emacs/.emacs.d/snippets")
-;;   ;; (yas-load-directory "~/dotfiles/emacs/.emacs.d/snippets")
-;;   ;; (add-to-list 'yas-snippet-dirs "~/dotfiles/emacs/.emacs.d/snippets")
-;;   ;; (setq yas-snippet-dirs (append yas-snippet-dirs
-;;   ;;                              '("~/dotfiles/emacs/.emacs.d/snippets")))
-;;   )
+(use-package! google-c-style
+  :init
+  (add-hook 'c-mode-common-hook (lambda () (google-set-c-style))))
+
+;; disable cuda-nvcc for flycheck
+(use-package! flycheck
+  :init
+  (setq-default flycheck-disabled-checkers '(cuda-nvcc))
+  )
+;; configure lsp for cuda
+(use-package! lsp-mode
+  :config
+  (add-to-list 'lsp-language-id-configuration '(cuda-mode . "cuda"))
+  (setq lsp-enable-links t)
+  ;; (:after cuda-mode
+  ;;        (add-hook 'cuda-mode-hook
+  ;;                  (lambda ()
+  ;;                    (lsp))))
+  )
+
+(setq +cc-default-header-file-mode 'c++-mode)
+
+(use-package! cuda-mode
+  :init
+  (add-to-list 'auto-mode-alist '("\\.cu\\'" . cuda-mode))
+  (add-to-list 'auto-mode-alist '("\\.cuh\\'" . cuda-mode))
+  (add-hook 'cuda-mode-hook (lambda ()
+                              (yas-minor-mode)
+                              (lsp)
+                              (display-line-numbers-mode)
+                              (setq +format-with 'clang-format)))
+  )
+
+(after! projectile
+  :config
+  (add-to-list 'projectile-other-file-alist '("cu" "cuh" "h" "hpp" "cpp"))
+  (add-to-list 'projectile-other-file-alist '("cuh" "cu" "cpp" "c"))
+  )
+
+;; Define rust mode
+(use-package! rust-mode
+  :hook (rust-mode . lsp))
+
+;; Add keybindings for interacting with Cargo
+(use-package! cargo
+  :hook (rust-mode . cargo-minor-mode))
+
+(use-package! flycheck-rust
+  :config (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 
 ;; Handle email
 (setq +mu4e-backend 'offlineimap)
-(def-package! mu4e
+(use-package! mu4e
   :init
-  (setq mu4e-maildir "~/mail"
-        mu4e-attachment-dir "~/mail/.attachments")
+  (setq mu4e-root-maildir "~/mail"
+        mu4e-attachment-dir "~/mail/.attachments"
+        mu4e-update-interval 600)
   (setq my-mu4e-account-alist
         '(("Gmail"
            (mu4e-sent-folder "/Gmail/Sent_Mail")
@@ -343,30 +418,5 @@
       ;; mu4e-compose-mode
       mu4e~update-mail-mode)
     'emacs)
-  (setq mu4e-update-interval 600)
   (setq mu4e-compose-format-flowed nil)
   )
-
-(def-package! google-c-style
-  :init
-  (add-hook 'c-mode-common-hook (lambda () (google-set-c-style))))
-
-(load "/usr/share/clang/clang-format.el")
-(after! cuda-mode
-  (add-hook 'cuda-mode-hook
-            (lambda ()
-              (progn
-                (general-define-key :keymaps 'cuda-mode-map :prefix doom-localleader-key :states 'visual
-                                    "f"
-                                    (list :def 'clang-format-region :which-key "clang-format-region"))
-                (general-define-key :keymaps 'cuda-mode-map :prefix doom-localleader-key :states 'normal
-                                    "f"
-                                    (list :def 'clang-format-buffer :which-key "clang-format-buffer")))
-              )))
-
-(after! lsp
-  (add-to-list 'lsp-language-id-configuration '(cuda-mode . "cuda"))
-  (add-hook 'cuda-mode-hook
-            (lambda ()
-              (lsp))))
-(setq +cc-default-header-file-mode 'c++-mode)
