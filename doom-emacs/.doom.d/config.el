@@ -11,6 +11,7 @@
 
 (set-language-environment "English")
 (prefer-coding-system 'utf-8)
+(setq comp-deferred-compilation t)
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
 ;; are the three important ones:
@@ -25,6 +26,7 @@
 (setq doom-font (font-spec :family "Source Code Pro" :size 14))
 (setq which-key-idle-delay 0)
 ;;(setq doom--line-number-style 'normal)
+;; (setq inhibit-compacting-font-caches t)
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -35,7 +37,7 @@
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/org/")
+(setq org-directory "~/Dropbox/org/")
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -97,8 +99,8 @@
             :desc "+ivy/project-search"       :nv "s" #'+ivy/project-search)
 
           (:desc "file" :prefix "f"
-            :desc "treemacs-toggle" :nv "n" #'+treemacs/toggle
-            :desc "treemacs-find-file" :nv "t" #'+treemacs/find-file)
+            :desc "neotree-toggle" :nv "n" #'neotree-toggle
+            :desc "neotree-find-file" :nv "t" #'+neotree/find-this-file)
 
           (:desc "alternate-buffer" :nv "TAB" #'+spacemacs/alternate-buffer))
         ))
@@ -118,21 +120,21 @@
 (map!
  "C-x p"   #'+popup/other
  "C-`"     #'+popup/toggle
- "C-~" #'+popup/raise
+ "C-~"     #'+popup/raise
  ;; smartparens
  (:after smartparens
-   :map smartparens-mode-map
-   "C-M-a"     #'sp-beginning-of-sexp
-   "C-M-e"     #'sp-end-of-sexp
-   "C-M-f"     #'sp-forward-sexp
-   "C-M-b"     #'sp-backward-sexp
-   "C-M-d"     #'sp-splice-sexp
-   "C-M-k"     #'sp-kill-sexp
-   "C-M-t"     #'sp-transpose-sexp
-   "C-<right>" #'sp-forward-slurp-sexp
-   "M-<right>" #'sp-forward-barf-sexp
-   "C-<left>"  #'sp-backward-slurp-sexp
-   "M-<left>" #'sp-backward-barf-sexp)
+  :map smartparens-mode-map
+  "C-M-a"     #'sp-beginning-of-sexp
+  "C-M-e"     #'sp-end-of-sexp
+  "C-M-f"     #'sp-forward-sexp
+  "C-M-b"     #'sp-backward-sexp
+  "C-M-d"     #'sp-splice-sexp
+  "C-M-k"     #'sp-kill-sexp
+  "C-M-t"     #'sp-transpose-sexp
+  "C-<right>" #'sp-forward-slurp-sexp
+  "M-<right>" #'sp-forward-barf-sexp
+  "C-<left>"  #'sp-backward-slurp-sexp
+  "M-<left>"  #'sp-backward-barf-sexp)
  ;; company mode
  (:after company
    :map company-active-map
@@ -201,14 +203,14 @@
 
  )
 
-(after! treemacs-evil
-  (add-hook 'treemacs-mode-hook (lambda ()
-                                  (define-key! evil-treemacs-state-local-map
-                                    "k" #'treemacs-next-line
-                                    "h" #'treemacs-previous-line
-                                    "j" #'treemacs-root-up
-                                    "l" #'treemacs-root-down)
-                                  )))
+;; (after! treemacs-evil
+;;   (add-hook 'treemacs-mode-hook (lambda ()
+;;                                   (define-key! evil-treemacs-state-local-map
+;;                                     "k" #'treemacs-next-line
+;;                                     "h" #'treemacs-previous-line
+;;                                     "j" #'treemacs-root-up
+;;                                     "l" #'treemacs-root-down)
+;;                                   )))
 
 (after! pdf-tools
   (map! :map pdf-view-mode-map
@@ -224,6 +226,12 @@
   (add-hook 'LaTeX-mode-hook #'+my-initialize-latex)
   (add-hook 'LaTeX-mode-hook #'+my-setup-synctex-latex)
   )
+
+(after! tex-mode
+  (map-delete sp-pairs 'LaTeX-mode)
+  (map-delete sp-pairs 'latex-mode)
+  (map-delete sp-pairs 'tex-mode)
+  (map-delete sp-pairs 'plain-tex-mode))
 
 (use-package! evil-nerd-commenter
   :init
@@ -242,6 +250,10 @@
 (use-package! pkgbuild-mode
   :commands (pkgbuild-mode)
   :mode (("PKGBUILD\\'" . pkgbuild-mode)))
+
+(defsubst cc-bytecomp-is-compiling ()
+  "Return non-nil if eval'ed during compilation."
+  (eq (cc-bytecomp-compiling-or-loading) 'compiling))
 
 ;; Completion at point
 (after! company
@@ -281,17 +293,30 @@
 ;; disable cuda-nvcc for flycheck
 (use-package! flycheck
   :init
-  (setq-default flycheck-disabled-checkers '(cuda-nvcc))
+  (setq-default flycheck-disabled-checkers '(cuda-nvcc c/c++-clang))
+  ;; (setq-default flycheck-enabled-checkers '(lsp ))
   )
+
+(use-package! flycheck-clang-tidy
+  :after flycheck
+  :hook
+  (flycheck-mode . flycheck-clang-tidy-setup)
+  )
+
 ;; configure lsp for cuda
-(use-package! lsp-mode
+(after! lsp-mode
   :config
   (add-to-list 'lsp-language-id-configuration '(cuda-mode . "cuda"))
   (setq lsp-enable-links t)
+  ;; (setq lsp-semantic-tokens-enable t)
   ;; (:after cuda-mode
   ;;        (add-hook 'cuda-mode-hook
   ;;                  (lambda ()
   ;;                    (lsp))))
+  (map!
+   (:leader
+     (:desc "code" :prefix "c"
+       :desc "evilnc-comment-or-uncomment-lines"     :nv "l" #'evilnc-comment-or-uncomment-lines)))
   )
 
 (setq +cc-default-header-file-mode 'c++-mode)
@@ -314,15 +339,18 @@
   )
 
 ;; Define rust mode
-(use-package! rust-mode
-  :hook (rust-mode . lsp))
+;; (use-package! rust-mode
+;;   :hook (rust-mode . lsp))
 
 ;; Add keybindings for interacting with Cargo
-(use-package! cargo
-  :hook (rust-mode . cargo-minor-mode))
+;; (use-package! cargo
+;;   :hook (rust-mode . cargo-minor-mode))
+;; (after! lsp-rust
+;;   (setq lsp-rust-server 'rust-analyzer))
+(setq rustic-lsp-server 'rust-analyzer)
 
-(use-package! flycheck-rust
-  :config (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+;; (use-package! flycheck-rust
+;;   :config (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 
 ;; Handle email
 (setq +mu4e-backend 'offlineimap)
@@ -420,3 +448,17 @@
     'emacs)
   (setq mu4e-compose-format-flowed nil)
   )
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(describe-char-unidata-list
+   '(name old-name general-category decomposition digit-value iso-10646-comment))
+ '(package-selected-packages '(all-the-icons)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

@@ -60,5 +60,7 @@
 (package! rust-mode)
 (package! cargo)
 (package! flycheck-rust)
+(package! flycheck-clang-tidy)
 (package! evil-snipe :disable t)
+(package! evil-escape :disable t)
 (package! org-mu4e :disable t)
