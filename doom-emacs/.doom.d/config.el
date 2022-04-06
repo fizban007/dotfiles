@@ -307,7 +307,11 @@
 (after! lsp-mode
   :config
   (add-to-list 'lsp-language-id-configuration '(cuda-mode . "cuda"))
+  (setq lsp-use-plists t)
   (setq lsp-enable-links t)
+  (setq lsp-idle-delay 0.500)
+  (setq lsp-lens-enable nil)
+  (setq lsp-log-io nil)
   ;; (setq lsp-semantic-tokens-enable t)
   ;; (:after cuda-mode
   ;;        (add-hook 'cuda-mode-hook
