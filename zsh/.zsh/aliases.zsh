@@ -45,5 +45,6 @@ alias sc="sudo systemctl"
 alias ni="nvidia-smi"
 alias t="todo.sh"
 alias qvod="cd ~/Downloads/PyQvod/project/src ; python ./PyQvod.py"
+alias vim="nvim"
 
 # vim:filetype=zsh
