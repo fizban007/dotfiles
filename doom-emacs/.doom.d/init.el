@@ -79,7 +79,8 @@
 
        :checkers
        syntax              ; tasing you for every semicolon you forget
-       spell             ; tasing you for misspelling mispelling
+       (spell              ; tasing you for misspelling mispelling
+        +aspell)
        ;;grammar           ; tasing grammar mistake every you make
 
        :tools
@@ -127,8 +128,10 @@
        ;;faust             ; dsp, but you get to keep your soul
        ;;fsharp           ; ML stands for Microsoft's Language
        ;;fstar             ; (dependent) types and (monadic) effects and Z3
-       ;;go                ; the hipster dialect
-       ;;(haskell +dante)  ; a language that's lazier than I am
+       go                ; the hipster dialect
+       (haskell
+        +dante
+        +lsp)            ; a language that's lazier than I am
        ;;hy                ; readability of scheme w/ speed of python
        ;;idris             ;
        ;;(java +meghanada) ; the poster child for carpal tunnel syndrome
@@ -176,7 +179,7 @@
        ;;yaml              ; JSON, but readable
 
        :email
-       (mu4e +gmail)
+       ;; (mu4e +gmail)
        ;;notmuch
        ;;(wanderlust +gmail)
 

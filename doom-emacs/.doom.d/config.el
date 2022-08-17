@@ -23,7 +23,7 @@
 ;;
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
-(setq doom-font (font-spec :family "Source Code Pro" :size 14))
+(setq doom-font (font-spec :family "Source Code Pro" :size 20))
 (setq which-key-idle-delay 0)
 ;;(setq doom--line-number-style 'normal)
 ;; (setq inhibit-compacting-font-caches t)
@@ -59,6 +59,9 @@
 ;;
 ;; You can also try 'gd' (or 'C-c g d') to jump to their definition and see how
 ;; they are implemented.
+
+(use-package all-the-icons
+  :if (display-graphic-p))
 
 ;; Key bindings
 (after! evil
@@ -162,7 +165,7 @@
    :nv "H"     #'magit-section-forward
    )
 
- (:when (featurep! :editor multiple-cursors)
+ (:when (modulep! :editor multiple-cursors)
    ;; evil-mc
    (:prefix "gz"
      :nv "d" #'evil-mc-make-and-goto-next-match
@@ -357,101 +360,101 @@
 ;;   :config (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 
 ;; Handle email
-(setq +mu4e-backend 'offlineimap)
-(use-package! mu4e
-  :init
-  (setq mu4e-root-maildir "~/mail"
-        mu4e-attachment-dir "~/mail/.attachments"
-        mu4e-update-interval 600)
-  (setq my-mu4e-account-alist
-        '(("Gmail"
-           (mu4e-sent-folder "/Gmail/Sent_Mail")
-           (mu4e-drafts-folder "/Gmail/Drafts")
-           (user-mail-address "fizban007@gmail.com")
-           (smtpmail-default-smtp-server "smtp.gmail.com")
-           (smtpmail-local-domain "gmail.com")
-           (smtpmail-smtp-user "fizban007")
-           (smtpmail-smtp-server "smtp.gmail.com")
-           (smtpmail-stream-type starttls)
-           (smtpmail-smtp-service 587))
-          ("Columbia"
-           (mu4e-sent-folder "/Columbia/Sent_Mail")
-           (mu4e-drafts-folder "/Columbia/Drafts")
-           (user-mail-address "yuran.chen@columbia.edu")
-           (smtpmail-default-smtp-server "smtp.gmail.com")
-           (smtpmail-local-domain "columbia.edu")
-           (smtpmail-smtp-user "yc2627@columbia.edu")
-           (smtpmail-smtp-server "smtp.gmail.com")
-           (smtpmail-stream-type starttls)
-           (smtpmail-smtp-service 587))
-          ("Princeton"
-           (mu4e-sent-folder "/Princeton/Sent_Mail")
-           (mu4e-drafts-folder "/Princeton/Drafts")
-           (user-mail-address "yuran.chen@princeton.edu")
-           (smtpmail-default-smtp-server "smtp.princeton.edu")
-           (smtpmail-local-domain "princeton.edu")
-           (smtpmail-smtp-user "yuranc")
-           (smtpmail-smtp-server "smtp.princeton.edu")
-           (smtpmail-stream-type starttls)
-           (smtpmail-smtp-service 587))
-          ("Astro"
-           (mu4e-sent-folder "/Astro/Sent_Mail")
-           (mu4e-drafts-folder "/Astro/Drafts")
-           (user-mail-address "alexc@astro.princeton.edu")
-           (smtpmail-default-smtp-server "mail.astro.princeton.edu")
-           (smtpmail-local-domain "astro.princeton.edu")
-           (smtpmail-smtp-user "alexc")
-           (smtpmail-smtp-server "mail.astro.princeton.edu")
-           (smtpmail-stream-type starttls)
-           (smtpmail-smtp-service 587))
-          ("DPSE"
-           (mu4e-sent-folder "/dpse/Sent")
-           (mu4e-drafts-folder "/dpse/Draft")
-           (user-mail-address "alex.c@deepsensing.cn")
-           (smtpmail-default-smtp-server "smtp.mxhichina.com")
-           (smtpmail-local-domain "deepsensing.cn")
-           (smtpmail-smtp-user "alex.c@deepsensing.cn")
-           (smtpmail-smtp-server "smtp.mxhichina.com")
-           (smtpmail-stream-type ssl)
-           (smtpmail-smtp-service 465))))
-  (defun my-mu4e-set-account ()
-    "Set the account for composing a message."
-    (let* ((account
-            (if mu4e-compose-parent-message
-                (let ((maildir (mu4e-message-field mu4e-compose-parent-message :maildir)))
-                  (string-match "/\\(.*?\\)/" maildir)
-                  (match-string 1 maildir))
-              (completing-read (format "Compose with account: (%s) "
-                                       (mapconcat #'(lambda (var) (car var))
-                                                  my-mu4e-account-alist "/"))
-                               (mapcar #'(lambda (var) (car var)) my-mu4e-account-alist)
-                               nil t nil nil (caar my-mu4e-account-alist))))
-           (account-vars (cdr (assoc account my-mu4e-account-alist))))
-      (if account-vars
-          (mapc #'(lambda (var)
-                    (set (car var) (cadr var)))
-                account-vars)
-        (error "No email account found"))))
-  (add-hook 'mu4e-compose-pre-hook 'my-mu4e-set-account)
-  (add-hook 'mu4e-compose-mode-hook #'turn-on-auto-fill)
+;; (setq +mu4e-backend 'offlineimap)
+;; (use-package! mu4e
+;;   :init
+;;   (setq mu4e-root-maildir "~/mail"
+;;         mu4e-attachment-dir "~/mail/.attachments"
+;;         mu4e-update-interval 600)
+;;   (setq my-mu4e-account-alist
+;;         '(("Gmail"
+;;            (mu4e-sent-folder "/Gmail/Sent_Mail")
+;;            (mu4e-drafts-folder "/Gmail/Drafts")
+;;            (user-mail-address "fizban007@gmail.com")
+;;            (smtpmail-default-smtp-server "smtp.gmail.com")
+;;            (smtpmail-local-domain "gmail.com")
+;;            (smtpmail-smtp-user "fizban007")
+;;            (smtpmail-smtp-server "smtp.gmail.com")
+;;            (smtpmail-stream-type starttls)
+;;            (smtpmail-smtp-service 587))
+;;           ("Columbia"
+;;            (mu4e-sent-folder "/Columbia/Sent_Mail")
+;;            (mu4e-drafts-folder "/Columbia/Drafts")
+;;            (user-mail-address "yuran.chen@columbia.edu")
+;;            (smtpmail-default-smtp-server "smtp.gmail.com")
+;;            (smtpmail-local-domain "columbia.edu")
+;;            (smtpmail-smtp-user "yc2627@columbia.edu")
+;;            (smtpmail-smtp-server "smtp.gmail.com")
+;;            (smtpmail-stream-type starttls)
+;;            (smtpmail-smtp-service 587))
+;;           ("Princeton"
+;;            (mu4e-sent-folder "/Princeton/Sent_Mail")
+;;            (mu4e-drafts-folder "/Princeton/Drafts")
+;;            (user-mail-address "yuran.chen@princeton.edu")
+;;            (smtpmail-default-smtp-server "smtp.princeton.edu")
+;;            (smtpmail-local-domain "princeton.edu")
+;;            (smtpmail-smtp-user "yuranc")
+;;            (smtpmail-smtp-server "smtp.princeton.edu")
+;;            (smtpmail-stream-type starttls)
+;;            (smtpmail-smtp-service 587))
+;;           ("Astro"
+;;            (mu4e-sent-folder "/Astro/Sent_Mail")
+;;            (mu4e-drafts-folder "/Astro/Drafts")
+;;            (user-mail-address "alexc@astro.princeton.edu")
+;;            (smtpmail-default-smtp-server "mail.astro.princeton.edu")
+;;            (smtpmail-local-domain "astro.princeton.edu")
+;;            (smtpmail-smtp-user "alexc")
+;;            (smtpmail-smtp-server "mail.astro.princeton.edu")
+;;            (smtpmail-stream-type starttls)
+;;            (smtpmail-smtp-service 587))
+;;           ("DPSE"
+;;            (mu4e-sent-folder "/dpse/Sent")
+;;            (mu4e-drafts-folder "/dpse/Draft")
+;;            (user-mail-address "alex.c@deepsensing.cn")
+;;            (smtpmail-default-smtp-server "smtp.mxhichina.com")
+;;            (smtpmail-local-domain "deepsensing.cn")
+;;            (smtpmail-smtp-user "alex.c@deepsensing.cn")
+;;            (smtpmail-smtp-server "smtp.mxhichina.com")
+;;            (smtpmail-stream-type ssl)
+;;            (smtpmail-smtp-service 465))))
+;;   (defun my-mu4e-set-account ()
+;;     "Set the account for composing a message."
+;;     (let* ((account
+;;             (if mu4e-compose-parent-message
+;;                 (let ((maildir (mu4e-message-field mu4e-compose-parent-message :maildir)))
+;;                   (string-match "/\\(.*?\\)/" maildir)
+;;                   (match-string 1 maildir))
+;;               (completing-read (format "Compose with account: (%s) "
+;;                                        (mapconcat #'(lambda (var) (car var))
+;;                                                   my-mu4e-account-alist "/"))
+;;                                (mapcar #'(lambda (var) (car var)) my-mu4e-account-alist)
+;;                                nil t nil nil (caar my-mu4e-account-alist))))
+;;            (account-vars (cdr (assoc account my-mu4e-account-alist))))
+;;       (if account-vars
+;;           (mapc #'(lambda (var)
+;;                     (set (car var) (cadr var)))
+;;                 account-vars)
+;;         (error "No email account found"))))
+;;   (add-hook 'mu4e-compose-pre-hook 'my-mu4e-set-account)
+;;   (add-hook 'mu4e-compose-mode-hook #'turn-on-auto-fill)
 
-  (setq mu4e-maildir-shortcuts
-        '( ("/Gmail/Primary"       . ?g)
-           ("/Gmail/Updates"       . ?u)
-           ("/Columbia/INBOX"      . ?c)
-           ("/Princeton/INBOX"     . ?p)
-           ("/Astro/INBOX"         . ?a)))
-  (setq browse-url-browser-function 'browse-url-firefox)
+;;   (setq mu4e-maildir-shortcuts
+;;         '( ("/Gmail/Primary"       . ?g)
+;;            ("/Gmail/Updates"       . ?u)
+;;            ("/Columbia/INBOX"      . ?c)
+;;            ("/Princeton/INBOX"     . ?p)
+;;            ("/Astro/INBOX"         . ?a)))
+;;   (setq browse-url-browser-function 'browse-url-firefox)
 
-  (set-evil-initial-state!
-    '(mu4e-main-mode
-      mu4e-view-mode
-      mu4e-headers-mode
-      ;; mu4e-compose-mode
-      mu4e~update-mail-mode)
-    'emacs)
-  (setq mu4e-compose-format-flowed nil)
-  )
+;;   (set-evil-initial-state!
+;;     '(mu4e-main-mode
+;;       mu4e-view-mode
+;;       mu4e-headers-mode
+;;       ;; mu4e-compose-mode
+;;       mu4e~update-mail-mode)
+;;     'emacs)
+;;   (setq mu4e-compose-format-flowed nil)
+;;   )
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -459,7 +462,7 @@
  ;; If there is more than one, they won't work right.
  '(describe-char-unidata-list
    '(name old-name general-category decomposition digit-value iso-10646-comment))
- '(package-selected-packages '(all-the-icons)))
+ )
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
