@@ -13,7 +13,7 @@ set $mod Mod4
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
-font pango:Terminus 10
+font pango:Terminus 12
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
@@ -63,10 +63,12 @@ bindsym $mod+F2 exec "rofi -modi drun,run -show drun"
 # bindcode $mod+40 exec --no-startup-id i3-dmenu-desktop
 
 # change focus
-bindsym $mod+n focus left
+bindsym $mod+h focus left
 bindsym $mod+e focus down
 bindsym $mod+i focus up
-bindsym $mod+o focus right
+bindsym $mod+k focus right
+bindsym $mod+Tab focus next
+bindsym $mod+Shift+Tab focus prev
 
 # use arrow keys to change workspaces
 bindsym $mod+Right workspace next_on_output
@@ -81,10 +83,10 @@ bindsym $mod+Shift+grave move container to workspace back_and_forth
 bindsym $mod+Ctrl+Right move workspace to output next
 
 # move focused windoW
-bindsym $mod+Shift+n move left
-bindsym $mod+Shift+e Move down
+bindsym $mod+Shift+h move left
+bindsym $mod+Shift+e move down
 bindsym $mod+Shift+i move up
-bindsym $mod+Shift+o move right
+bindsym $mod+Shift+k move right
 
 # alternatively, you can use the cursor keys:
 bindsym $mod+Shift+Left move left
@@ -93,10 +95,10 @@ bindsym $mod+Shift+Up move up
 bindsym $mod+Shift+Right move right
 
 # split in horizontal orientation
-bindsym $mod+h split h
+bindsym $mod+minus split h
 
 # split in vertical orientation
-bindsym $mod+v split v
+bindsym $mod+slash split v
 
 # enter fullscreen mode for the focused container
 bindsym $mod+b fullscreen toggle
@@ -125,19 +127,19 @@ set $ws2 "web"
 set $ws3 "email"
 set $ws4 "file"
 set $ws5 "pdf"
-set $ws6 "6"
-set $ws7 "7"
-set $ws8 "8"
+set $ws6 "media"
+set $ws7 "emacs"
+set $ws8 "misc"
 set $ws9 "other"
 
 # switch to workspace
 bindsym $mod+1 workspace $ws1
-bindsym $mod+2 workspace $ws2
-bindsym $mod+3 workspace $ws3
-bindsym $mod+q workspace $ws4
-bindsym $mod+w workspace $ws5
+bindsym $mod+2 workspace $ws2; layout tabbed
+bindsym $mod+3 workspace $ws3; layout tabbed
+bindsym $mod+q workspace $ws4; layout tabbed
+bindsym $mod+w workspace $ws5; layout tabbed
 bindsym $mod+f workspace $ws6
-bindsym $mod+a workspace $ws7
+bindsym $mod+a workspace $ws7; layout tabbed
 bindsym $mod+r workspace $ws8
 bindsym $mod+s workspace $ws9
 
@@ -160,31 +162,31 @@ bindsym $mod+F11 restart
 bindsym $mod+F12 exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 
 # resize window (you can also use the mouse for that)
-mode "resize" {
-        # These bindings trigger as soon as you enter the resize mode
+# mode "resize" {
+#         # These bindings trigger as soon as you enter the resize mode
 
-        # Pressing left will shrink the window’s width.
-        # Pressing right will grow the window’s width.
-        # Pressing up will shrink the window’s height.
-        # Pressing down will grow the window’s height.
-        bindsym n resize shrink width 10 px or 10 ppt
-        bindsym e resize grow height 10 px or 10 ppt
-        bindsym i resize shrink height 10 px or 10 ppt
-        bindsym o resize grow width 10 px or 10 ppt
+#         # Pressing left will shrink the window’s width.
+#         # Pressing right will grow the window’s width.
+#         # Pressing up will shrink the window’s height.
+#         # Pressing down will grow the window’s height.
+#         bindsym n resize shrink width 10 px or 10 ppt
+#         bindsym e resize grow height 10 px or 10 ppt
+#         bindsym i resize shrink height 10 px or 10 ppt
+#         bindsym o resize grow width 10 px or 10 ppt
 
-        # same bindings, but for the arrow keys
-        bindsym Left resize shrink width 10 px or 10 ppt
-        bindsym Down resize grow height 10 px or 10 ppt
-        bindsym Up resize shrink height 10 px or 10 ppt
-        bindsym Right resize grow width 10 px or 10 ppt
+#         # same bindings, but for the arrow keys
+#         bindsym Left resize shrink width 10 px or 10 ppt
+#         bindsym Down resize grow height 10 px or 10 ppt
+#         bindsym Up resize shrink height 10 px or 10 ppt
+#         bindsym Right resize grow width 10 px or 10 ppt
 
-        # back to normal: Enter or Escape or $mod+r
-        bindsym Return mode "default"
-        bindsym Escape mode "default"
-        bindsym $mod+k mode "default"
-}
+#         # back to normal: Enter or Escape or $mod+r
+#         bindsym Return mode "default"
+#         bindsym Escape mode "default"
+#         bindsym $mod+k mode "default"
+# }
 
-bindsym $mod+k mode "resize"
+# bindsym $mod+k mode "resize"
 
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
@@ -208,5 +210,16 @@ for_window [class="Kmix"] floating enable; border none
 for_window [class="Klipper"] floating enable; border none
 for_window [class="Plasmoidviewer"] floating enable; border none
 for_window [class="(?i)*nextcloud*"] floating disable
-for_window [class="plasmashell" window_type="notification"] border none, move right 700px, move down 450px
+for_window [class="plasmashell" window_type="notification"] border none 
+#, move right 700px, move down 450px
 no_focus [class="plasmashell" window_type="notification"]
+
+# Assign clients to specific workspaces
+assign [class="^konsole$"] → $ws1
+assign [class="^URxvt$"] → $ws1
+assign [class="^firefox$"] → $ws2
+assign [class="^Zotero$"] → $ws2
+assign [class="^Thunderbird$"] → $ws3
+assign [class="^dolphin$"] → $ws4
+assign [class="^okular$"] → $ws5
+assign [class="^Emacs$"] → $ws7
