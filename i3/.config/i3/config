@@ -33,6 +33,9 @@ exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 # nitrogen restore sets the wallpaper for i3 session
 exec --no-startup-id nitrogen --restore
 
+# setting border of the window to pixel disables title bars
+default_border pixel 1
+
 # NetworkManager is the most popular way to manage wireless networks on Linux,
 # and nm-applet is a desktop environment-independent system tray GUI for it.
 # exec --no-startup-id nm-applet
@@ -213,6 +216,8 @@ for_window [class="(?i)*nextcloud*"] floating disable
 for_window [class="plasmashell" window_type="notification"] border none 
 #, move right 700px, move down 450px
 no_focus [class="plasmashell" window_type="notification"]
+
+for_window [class="zoom" title="Settings"] floating enable; border none
 
 # Assign clients to specific workspaces
 assign [class="^konsole$"] → $ws1
