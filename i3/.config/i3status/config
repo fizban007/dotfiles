@@ -14,6 +14,7 @@ general {
 #order += "wireless _first_"
 order += "battery all"
 #order += "disk /"
+order += "cpu_usage"
 order += "cpu_temperature 0"
 order += "memory"
 #order += "tztime local"
@@ -45,6 +46,10 @@ battery all {
 #load {
 #        format = "%1min"
 #}
+
+cpu_usage {
+        format = "CPU: %usage"
+}
 
 cpu_temperature 0 {
         format = "%degrees °C"
