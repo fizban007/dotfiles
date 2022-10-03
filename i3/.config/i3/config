@@ -137,12 +137,13 @@ set $ws9 "other"
 
 # switch to workspace
 bindsym $mod+1 workspace $ws1
-bindsym $mod+2 workspace $ws2; layout tabbed
-bindsym $mod+3 workspace $ws3; layout tabbed
-bindsym $mod+q workspace $ws4; layout tabbed
-bindsym $mod+w workspace $ws5; layout tabbed
+#bindsym $mod+2 workspace $ws2; layout tabbed
+bindsym $mod+2 workspace $ws2
+bindsym $mod+3 workspace $ws3
+bindsym $mod+q workspace $ws4
+bindsym $mod+w workspace $ws5
 bindsym $mod+f workspace $ws6
-bindsym $mod+a workspace $ws7; layout tabbed
+bindsym $mod+a workspace $ws7
 bindsym $mod+r workspace $ws8
 bindsym $mod+s workspace $ws9
 
@@ -163,6 +164,17 @@ bindsym $mod+F10 reload
 bindsym $mod+F11 restart
 # exit i3 (logs you out of your X session)
 bindsym $mod+F12 exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
+
+# Enter mpd modal bindings
+mode "mpd" {
+    bindsym x exec "mpc toggle"; mode "default"
+    bindsym n exec "mpc next"; mode "default"
+    bindsym p exec "mpc prev"; mode "default"
+    bindsym $mod+m mode "default"
+    bindsym Escape mode "default"
+}
+
+bindsym $mod+m mode "mpd"
 
 # resize window (you can also use the mouse for that)
 # mode "resize" {
@@ -217,14 +229,55 @@ for_window [class="plasmashell" window_type="notification"] border none
 #, move right 700px, move down 450px
 no_focus [class="plasmashell" window_type="notification"]
 
-for_window [class="zoom" title="Settings"] floating enable; border none
+for_window [class="zoom"] floating enable; border none
+for_window [class="Pianoteq"] floating enable; border none
+for_window [class="QjackCtl"] floating enable; border none
 
 # Assign clients to specific workspaces
 assign [class="^konsole$"] → $ws1
 assign [class="^URxvt$"] → $ws1
 assign [class="^firefox$"] → $ws2
+assign [class="^Slack$"] → $ws2
 assign [class="^Zotero$"] → $ws2
-assign [class="^Thunderbird$"] → $ws3
+assign [class="^thunderbird$"] → $ws3
 assign [class="^dolphin$"] → $ws4
 assign [class="^okular$"] → $ws5
 assign [class="^Emacs$"] → $ws7
+
+set $i3_resurrect i3-resurrect
+
+# Save workspace mode
+mode "save" {
+    bindsym 1 exec $i3_resurrect save -w $ws1; mode "default"
+    bindsym 2 exec $i3_resurrect save -w $ws2; mode "default"
+    bindsym 3 exec $i3_resurrect save -w $ws3; mode "default"
+    bindsym q exec $i3_resurrect save -w $ws4; mode "default"
+    bindsym w exec $i3_resurrect save -w $ws5; mode "default"
+    bindsym f exec $i3_resurrect save -w $ws6; mode "default"
+    bindsym a exec $i3_resurrect save -w $ws7; mode "default"
+    bindsym r exec $i3_resurrect save -w $ws8; mode "default"
+    bindsym s exec $i3_resurrect save -w $ws9; mode "default"
+
+    bindsym Escape mode "default"
+    bindsym Return mode "default"
+}
+
+bindsym $mod+F3 mode "save"
+
+# Restore workspace mode
+mode "restore" {
+    bindsym 1 exec $i3_resurrect restore -w $ws1; mode "default"
+    bindsym 2 exec $i3_resurrect restore -w $ws2; mode "default"
+    bindsym 3 exec $i3_resurrect restore -w $ws3; mode "default"
+    bindsym q exec $i3_resurrect restore -w $ws4; mode "default"
+    bindsym w exec $i3_resurrect restore -w $ws5; mode "default"
+    bindsym f exec $i3_resurrect restore -w $ws6; mode "default"
+    bindsym a exec $i3_resurrect restore -w $ws7; mode "default"
+    bindsym r exec $i3_resurrect restore -w $ws8; mode "default"
+    bindsym s exec $i3_resurrect restore -w $ws9; mode "default"
+
+    bindsym Escape mode "default"
+    bindsym Return mode "default"
+}
+
+bindsym $mod+F4 mode "restore"
